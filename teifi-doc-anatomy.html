@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
-<title>Teifi Document Anatomy · Agentify SE</title>
+<title>Teifi Document Anatomy · Solutions Architecture Portal</title>
 <script src="./libs/react.js"></script>
 <script src="./libs/react-dom.js"></script>
 <script src="./libs/babel.js"></script>
@@ -1124,7 +1124,7 @@ const TEMPLATES = [
       // Header row
       React.createElement('div', { style:{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:'16px', flexWrap:'wrap', gap:'8px' } },
         React.createElement('div', { style:{ display:'flex', alignItems:'center', gap:'10px' } },
-          React.createElement('span', { style:{ fontSize:'14px', fontWeight:700, color:'#F8FAFC' } }, '🤖 Agentify SE Intelligence'),
+          React.createElement('span', { style:{ fontSize:'14px', fontWeight:700, color:'#F8FAFC' } }, '⚡ SE Intelligence'),
           React.createElement('span', { style:{
             padding:'3px 10px', borderRadius:'12px', fontSize:'11px', fontWeight:700,
             background: riskBg, color: riskColor, border:`1px solid ${riskColor}44`
@@ -1145,7 +1145,7 @@ const TEMPLATES = [
 
         // Column 1: Modules + Solution Areas
         React.createElement('div', { style:{ background:'#1E293B', borderRadius:'8px', padding:'12px' } },
-          React.createElement('div', { style:{ fontSize:'11px', fontWeight:700, color:'#94A3B8', textTransform:'uppercase', letterSpacing:'0.08em', marginBottom:'8px' } }, 'Agentify Modules'),
+          React.createElement('div', { style:{ fontSize:'11px', fontWeight:700, color:'#94A3B8', textTransform:'uppercase', letterSpacing:'0.08em', marginBottom:'8px' } }, 'SE Modules'),
           React.createElement('div', { style:{ display:'flex', flexWrap:'wrap', gap:'4px', marginBottom:'12px' } },
             (intel.modules || []).map((m,i) => React.createElement('span', { key:i, 'data-testid':`module-chip-${m.replace(/\s+/g,'-').toLowerCase()}`, style:{
               fontSize:'10px', padding:'2px 7px', borderRadius:'4px',
@@ -1180,9 +1180,9 @@ const TEMPLATES = [
           )
         ),
 
-        // Column 3: Agentify Pipeline
+        // Column 3: SE Pipeline
         React.createElement('div', { style:{ background:'#1E293B', borderRadius:'8px', padding:'12px' } },
-          React.createElement('div', { style:{ fontSize:'11px', fontWeight:700, color:'#94A3B8', textTransform:'uppercase', letterSpacing:'0.08em', marginBottom:'8px' } }, 'Agentify Pipeline'),
+          React.createElement('div', { style:{ fontSize:'11px', fontWeight:700, color:'#94A3B8', textTransform:'uppercase', letterSpacing:'0.08em', marginBottom:'8px' } }, 'SE Pipeline'),
           [
             { icon:'⚡', label:'Trigger', val: intel.agentifyPipeline?.trigger },
             { icon:'🗄️', label:'Data Source', val: intel.agentifyPipeline?.dataSource },
@@ -1449,10 +1449,10 @@ const TEMPLATES = [
         }},
           React.createElement('div', { style:{ display:'flex', alignItems:'center', gap:'8px', marginBottom:'4px' }},
             React.createElement('span', { style:{ fontSize:'18px' }}, '⚡'),
-            React.createElement('span', { style:{ fontWeight:700, fontSize:'14px', color:'#F1F5F9', letterSpacing:'-0.3px' }}, 'Agentify'),
+            React.createElement('span', { style:{ fontWeight:700, fontSize:'14px', color:'#F1F5F9', letterSpacing:'-0.3px' }}, 'Teifi Digital'),
             React.createElement('span', { style:{ fontSize:'11px', background:'#312E81', color:'#A5B4FC', padding:'1px 6px', borderRadius:'4px', fontWeight:600 }}, 'SE')
           ),
-          React.createElement('p', { style:{ fontSize:'10px', color:'#64748B', margin:0, lineHeight:1.4 }}, 'Red Wireless · Doc Anatomy Module')
+          React.createElement('p', { style:{ fontSize:'10px', color:'#64748B', margin:0, lineHeight:1.4 }}, 'Solutions Architecture Portal')
         ),
 
         // Tab switcher
