@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Teifi ELC Tools</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #0f172a;
+      color: #f1f5f9;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .container { max-width: 600px; width: 100%; padding: 40px 24px; }
+    .logo {
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: #3b82f6;
+      margin-bottom: 32px;
+    }
+    h1 { font-size: 28px; font-weight: 700; margin-bottom: 8px; }
+    .subtitle { font-size: 14px; color: #94a3b8; margin-bottom: 40px; }
+    .tools { display: flex; flex-direction: column; gap: 16px; }
+    .tool-card {
+      background: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 12px;
+      padding: 24px;
+      text-decoration: none;
+      color: inherit;
+      transition: border-color 0.15s, background 0.15s;
+      display: block;
+    }
+    .tool-card:hover { border-color: #3b82f6; background: #1e3a5f; }
+    .tool-name {
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .tool-name span { font-size: 20px; }
+    .tool-desc { font-size: 13px; color: #94a3b8; line-height: 1.5; }
+    .badge {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      background: #1d4ed8;
+      color: #bfdbfe;
+      padding: 2px 8px;
+      border-radius: 99px;
+      margin-left: auto;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="logo">Teifi × Agentify</div>
+    <h1>ELC Tools</h1>
+    <p class="subtitle">Solutions engineering tools for the Agentify project.</p>
+    <div class="tools">
+      <a class="tool-card" href="/teifi-doc-anatomy.html">
+        <div class="tool-name">
+          <span>🧬</span> SE Doc Anatomy
+          <div class="badge">New</div>
+        </div>
+        <div class="tool-desc">Explore the anatomy of every SE document — proposals, SOWs, QBRs, battle cards, and more. Browse sections, field definitions, and SE intel for 11 template types.</div>
+      </a>
+      <a class="tool-card" href="/elc-sow-explorer.html">
+        <div class="tool-name">
+          <span>📄</span> SOW Explorer
+        </div>
+        <div class="tool-desc">Interactive statement of work explorer for building and reviewing SOW components across ELC engagements.</div>
+      </a>
+    </div>
+  </div>
+</body>
+</html>

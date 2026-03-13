@@ -1,0 +1,1601 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Teifi Document Anatomy · Agentify SE</title>
+<script src="./libs/react.js"></script>
+<script src="./libs/react-dom.js"></script>
+<script src="./libs/babel.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#F1F5F9;color:#1E293B;height:100vh;overflow:hidden}
+.app{display:flex;height:100vh}
+/* Sidebar */
+.sidebar{width:234px;min-width:234px;background:#0F172A;color:#CBD5E1;display:flex;flex-direction:column;overflow:hidden}
+.sidebar-logo{padding:16px 16px 10px;border-bottom:1px solid #1E293B}
+.sidebar-logo-text{font-size:15px;font-weight:700;color:#F1F5F9;letter-spacing:-.3px}
+.sidebar-logo-sub{font-size:10px;color:#475569;margin-top:2px;text-transform:uppercase;letter-spacing:.8px}
+.sidebar-section-label{font-size:9px;font-weight:600;color:#475569;text-transform:uppercase;letter-spacing:.8px;padding:14px 16px 5px}
+.sidebar-tabs{flex:1;overflow-y:auto;padding-bottom:12px}
+.sidebar-tabs::-webkit-scrollbar{width:4px}
+.sidebar-tabs::-webkit-scrollbar-thumb{background:#334155;border-radius:2px}
+.sidebar-tab{display:flex;align-items:center;gap:9px;padding:7px 16px;cursor:pointer;font-size:12.5px;color:#94A3B8;transition:all .15s;border-left:3px solid transparent;line-height:1.3}
+.sidebar-tab:hover{background:#1E293B;color:#E2E8F0}
+.sidebar-tab.active{background:#1E3A5F;color:#60A5FA;border-left-color:#3B82F6;font-weight:500}
+.sidebar-tab-icon{font-size:14px;width:18px;text-align:center;flex-shrink:0}
+.sidebar-tab-name{flex:1;min-width:0}
+.sidebar-tab-badge{font-size:9px;background:#334155;color:#94A3B8;padding:1px 5px;border-radius:8px;flex-shrink:0}
+.sidebar-tab.active .sidebar-tab-badge{background:#1D4ED8;color:#BFDBFE}
+.sidebar-divider{height:1px;background:#1E293B;margin:6px 0}
+/* Main content */
+.main{flex:1;overflow:hidden;display:flex;flex-direction:column;background:#F8FAFC}
+.main-header{background:#fff;border-bottom:1px solid #E2E8F0;padding:14px 24px;display:flex;align-items:center;gap:12px;flex-shrink:0}
+.main-header-title{font-size:16px;font-weight:600;color:#0F172A}
+.main-header-sub{font-size:12px;color:#64748B;margin-left:4px}
+.main-header-right{display:flex;align-items:center;gap:8px;margin-left:auto}
+.main-header-variants{display:flex;gap:6px}
+.variant-badge{font-size:10px;padding:2px 7px;border-radius:10px;background:#F1F5F9;color:#64748B;border:1px solid #E2E8F0;font-weight:500}
+.ctrl-btn{font-size:11px;padding:5px 11px;border:1px solid #E2E8F0;border-radius:6px;background:#fff;color:#475569;cursor:pointer;font-weight:500;transition:all .12s}
+.ctrl-btn:hover{background:#F8FAFC;border-color:#CBD5E1}
+.ctrl-btn.intel-active{background:#EFF6FF;border-color:#93C5FD;color:#1D4ED8}
+.main-scroll{flex:1;overflow-y:auto;padding:20px 24px 40px}
+.main-scroll::-webkit-scrollbar{width:6px}
+.main-scroll::-webkit-scrollbar-thumb{background:#CBD5E1;border-radius:3px}
+/* Document paper */
+.doc-paper{max-width:820px;margin:0 auto;background:#fff;border-radius:8px;box-shadow:0 1px 3px rgba(0,0,0,.08),0 4px 16px rgba(0,0,0,.04);overflow:hidden}
+/* Cover */
+.doc-cover{background:linear-gradient(135deg,#0F172A 0%,#1E3A5F 100%);padding:36px 36px 28px;color:#fff}
+.doc-cover-label{font-size:9px;font-weight:600;letter-spacing:1.2px;text-transform:uppercase;color:#60A5FA;margin-bottom:8px}
+.doc-cover-title{font-size:22px;font-weight:700;color:#F1F5F9;line-height:1.3;margin-bottom:4px}
+.doc-cover-subtitle{font-size:12px;color:#94A3B8;margin-bottom:20px}
+.cover-fields{display:flex;flex-wrap:wrap;gap:6px;margin-top:16px}
+/* SE Intel Panel */
+.se-intel-panel{background:linear-gradient(135deg,#F0FDF4 0%,#F0F9FF 100%);border:1px solid #BBF7D0;border-top:none;padding:0}
+.se-intel-header{display:flex;align-items:center;gap:8px;padding:12px 24px 10px;border-bottom:1px solid #D1FAE5;cursor:pointer;user-select:none}
+.se-intel-header:hover{background:rgba(16,185,129,.04)}
+.se-intel-title{font-size:12px;font-weight:700;color:#065F46;letter-spacing:.3px;text-transform:uppercase;flex:1}
+.se-intel-toggle{font-size:11px;color:#059669}
+.se-intel-body{padding:14px 24px 18px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px}
+.se-intel-col{}
+.si-label{font-size:9.5px;font-weight:700;color:#059669;text-transform:uppercase;letter-spacing:.6px;margin-bottom:6px}
+.si-chips{display:flex;flex-wrap:wrap;gap:4px}
+.si-chip{font-size:10.5px;padding:2px 8px;border-radius:10px;font-weight:500;white-space:nowrap}
+.si-chip-module{background:#DCFCE7;color:#166534;border:1px solid #BBF7D0}
+.si-chip-sa{background:#E0F2FE;color:#0369A1;border:1px solid #BAE6FD}
+.si-risk{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:600;padding:3px 10px;border-radius:10px}
+.risk-low{background:#D1FAE5;color:#065F46;border:1px solid #A7F3D0}
+.risk-medium{background:#FEF3C7;color:#92400E;border:1px solid #FDE68A}
+.risk-high{background:#FEE2E2;color:#9F1239;border:1px solid #FECACA}
+.si-confidence{font-size:11px;font-weight:600;padding:2px 8px;border-radius:6px}
+.conf-high{background:#D1FAE5;color:#065F46}
+.conf-medium{background:#FEF3C7;color:#92400E}
+.conf-low{background:#FEE2E2;color:#9F1239}
+.si-hours-grid{display:grid;grid-template-columns:1fr 1fr;gap:4px 12px}
+.si-hours-row{display:flex;justify-content:space-between;align-items:center;font-size:11px}
+.si-hours-role{color:#475569}
+.si-hours-val{font-weight:600;color:#1E293B;font-family:'SF Mono',Consolas,monospace;font-size:10.5px}
+.si-pipeline-block{grid-column:1/-1;background:rgba(0,0,0,.03);border-radius:6px;padding:10px 12px;border:1px solid rgba(0,0,0,.06)}
+.si-pipeline-row{display:flex;gap:8px;align-items:flex-start;font-size:11px;padding:2px 0;border-bottom:1px solid rgba(0,0,0,.04)}
+.si-pipeline-row:last-child{border-bottom:none;padding-bottom:0}
+.si-pipeline-key{font-weight:600;color:#0369A1;min-width:100px;flex-shrink:0}
+.si-pipeline-val{color:#334155;line-height:1.5}
+.si-autofill{display:flex;flex-wrap:wrap;gap:3px;margin-top:4px}
+.si-autofill-chip{font-size:9.5px;padding:1px 6px;border-radius:8px;background:#EFF6FF;color:#1D4ED8;border:1px solid #BFDBFE;font-family:'SF Mono',Consolas,monospace}
+.si-review-chip{font-size:9.5px;padding:1px 6px;border-radius:8px;background:#FFFBEB;color:#92400E;border:1px solid #FDE68A;font-family:'SF Mono',Consolas,monospace}
+/* Section */
+.doc-section{border-bottom:1px solid #F1F5F9}
+.doc-section:last-child{border-bottom:none}
+.section-block{border-bottom:1px solid #F1F5F9}
+.section-block:last-child{border-bottom:none}
+.section-header{display:flex;align-items:center;gap:10px;padding:12px 24px;cursor:pointer;background:#fff;transition:background .12s;user-select:none}
+.section-header:hover{background:#F8FAFC}
+.section-chevron{font-size:10px;color:#94A3B8;transition:transform .2s;width:12px;flex-shrink:0}
+.section-chevron.open{transform:rotate(90deg)}
+.section-num{font-size:10px;font-weight:700;color:#94A3B8;min-width:24px}
+.section-name{font-size:13px;font-weight:600;color:#1E293B;flex:1}
+.section-meta{font-size:10px;color:#94A3B8;background:#F1F5F9;padding:1px 7px;border-radius:8px;white-space:nowrap}
+.section-body{padding:0 24px 14px;background:#FAFBFC}
+.section-notes{font-size:11px;color:#64748B;font-style:italic;padding:8px 0 4px;line-height:1.5}
+/* Block */
+.block-item{margin-bottom:8px;border:1px solid #E9EEF4;border-radius:6px;overflow:hidden;background:#fff}
+.block-header{display:flex;align-items:center;gap:8px;padding:8px 12px;cursor:pointer;transition:background .12s}
+.block-header:hover{background:#F8FAFC}
+.block-type-pill{font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;padding:2px 6px;border-radius:4px;flex-shrink:0}
+.pill-table{background:#FEF3C7;color:#92400E}
+.pill-para{background:#E0F2FE;color:#0369A1}
+.pill-heading{background:#F3E8FF;color:#7C3AED}
+.pill-list{background:#ECFDF5;color:#065F46}
+.pill-callout{background:#FFF1F2;color:#9F1239}
+.pill-signature{background:#F0FDF4;color:#166534}
+.block-desc{font-size:12px;color:#475569;flex:1;min-width:0}
+.block-notes{font-size:11px;color:#94A3B8;font-style:italic;padding:4px 12px 6px;border-top:1px dashed #F1F5F9;background:#FAFBFC}
+.block-vars{display:flex;flex-wrap:wrap;gap:4px;padding:6px 12px 8px;border-top:1px solid #F1F5F9;background:#FAFBFC}
+/* Field badges */
+.field-badge{font-size:10px;font-weight:500;padding:2px 7px;border-radius:10px;cursor:pointer;transition:opacity .12s;white-space:nowrap;border:1px solid transparent;display:inline-block}
+.field-badge:hover{opacity:.8}
+.badge-org{background:#EFF6FF;color:#1D4ED8;border-color:#BFDBFE}
+.badge-deal{background:#F5F3FF;color:#7C3AED;border-color:#DDD6FE}
+.badge-person{background:#ECFDF5;color:#065F46;border-color:#A7F3D0}
+.badge-product{background:#FFFBEB;color:#92400E;border-color:#FDE68A}
+.badge-datetime{background:#FFF1F2;color:#9F1239;border-color:#FECDD3}
+/* Legend */
+.legend{display:flex;gap:12px;flex-wrap:wrap;padding:10px 24px;background:#fff;border-top:1px solid #F1F5F9;font-size:11px;flex-shrink:0}
+.legend-item{display:flex;align-items:center;gap:5px}
+/* Master field list */
+.mfl-header{padding:0 0 16px 0}
+.mfl-search{display:flex;gap:10px;margin-bottom:14px}
+.mfl-search input{flex:1;padding:8px 12px;border:1px solid #E2E8F0;border-radius:6px;font-size:13px;color:#1E293B;outline:none}
+.mfl-search input:focus{border-color:#3B82F6;box-shadow:0 0 0 2px #DBEAFE}
+.mfl-filter-btn{padding:6px 12px;border:1px solid #E2E8F0;border-radius:6px;background:#fff;font-size:12px;color:#64748B;cursor:pointer;transition:all .12s}
+.mfl-filter-btn.active{background:#EFF6FF;border-color:#BFDBFE;color:#1D4ED8}
+.field-table{width:100%;border-collapse:collapse;background:#fff;border-radius:8px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.06)}
+.field-table th{background:#F8FAFC;padding:10px 14px;text-align:left;font-size:11px;font-weight:600;color:#64748B;text-transform:uppercase;letter-spacing:.5px;border-bottom:1px solid #E2E8F0;white-space:nowrap}
+.field-table td{padding:10px 14px;font-size:12.5px;color:#1E293B;border-bottom:1px solid #F1F5F9;vertical-align:top}
+.field-table tr:last-child td{border-bottom:none}
+.field-table tr:hover td{background:#F8FAFC}
+.field-table tr.expanded td{background:#F0F9FF}
+.field-row-expand{cursor:pointer}
+.field-expand-area{padding:0;max-height:0;overflow:hidden;transition:max-height .25s ease}
+.field-expand-area.open{max-height:400px}
+.field-expand-inner{padding:14px 18px;background:#F0F9FF;border-top:1px solid #DBEAFE;display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.formula-block{grid-column:1/-1}
+.formula-label{font-size:11px;font-weight:600;color:#1D4ED8;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px}
+.formula-input-row{display:flex;gap:8px;align-items:center}
+.formula-prefix{font-size:13px;font-weight:600;color:#7C3AED;font-family:'SF Mono',Consolas,monospace}
+.formula-input{flex:1;padding:6px 10px;border:1px solid #C7D2FE;border-radius:5px;font-size:13px;font-family:'SF Mono',Consolas,monospace;color:#1E293B;background:#fff;outline:none}
+.formula-input:focus{border-color:#6366F1;box-shadow:0 0 0 2px #E0E7FF}
+.formula-save{padding:5px 12px;background:#3B82F6;color:#fff;border:none;border-radius:5px;font-size:12px;font-weight:600;cursor:pointer;transition:background .12s}
+.formula-save:hover{background:#2563EB}
+.formula-saved{color:#059669;font-size:11px;margin-left:6px;font-weight:600}
+.dep-block{}
+.dep-label{font-size:11px;font-weight:600;color:#7C3AED;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px}
+.dep-chips{display:flex;flex-wrap:wrap;gap:5px;min-height:28px;padding:4px;border:1px solid #E9D5FF;border-radius:5px;background:#fff;cursor:text}
+.dep-chip{display:flex;align-items:center;gap:4px;font-size:11px;background:#F5F3FF;color:#7C3AED;border:1px solid #DDD6FE;padding:2px 7px;border-radius:10px}
+.dep-chip-remove{cursor:pointer;color:#A78BFA;font-size:12px;line-height:1}
+.dep-chip-remove:hover{color:#7C3AED}
+.dep-add-input{border:none;outline:none;font-size:12px;flex:1;min-width:80px;padding:2px 4px;color:#1E293B}
+.blocks-block{}
+.blocks-label{font-size:11px;font-weight:600;color:#DC2626;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px}
+.blocks-chips{display:flex;flex-wrap:wrap;gap:5px;min-height:28px;padding:4px;border:1px solid #FECACA;border-radius:5px;background:#fff;cursor:text}
+.blocks-chip{display:flex;align-items:center;gap:4px;font-size:11px;background:#FFF1F2;color:#DC2626;border:1px solid #FECACA;padding:2px 7px;border-radius:10px}
+.template-dots{display:flex;gap:3px;flex-wrap:wrap}
+.tdot{width:18px;height:18px;border-radius:3px;font-size:9px;font-weight:700;display:flex;align-items:center;justify-content:center;color:#fff;cursor:default;flex-shrink:0}
+.field-source-key{font-size:10px;color:#94A3B8;font-family:'SF Mono',Consolas,monospace;margin-top:2px}
+.empty-state{text-align:center;padding:40px;color:#94A3B8;font-size:13px}
+.tab-count-badge{font-size:10px;background:#1D4ED8;color:#BFDBFE;padding:1px 6px;border-radius:8px;margin-left:4px}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const { useState, useMemo, useCallback, useRef, useEffect } = React;
+
+
+const FTYPE = {
+  org_custom:  { label:'Org Custom',  color:'#6366F1', bg:'#EEF2FF', desc:'Custom org data from CRM/HubSpot account record' },
+  org_name:    { label:'Org Name',    color:'#7C3AED', bg:'#F5F3FF', desc:'Auto-populated Red Wireless legal entity name' },
+  deal_custom: { label:'Deal Custom', color:'#0EA5E9', bg:'#E0F2FE', desc:'Deal-specific fields from CRM opportunity record' },
+  person:      { label:'Person',      color:'#10B981', bg:'#D1FAE5', desc:'Contact / signatory person fields from CRM' },
+  product:     { label:'Product',     color:'#F59E0B', bg:'#FEF3C7', desc:'Product line items from CPQ / quote object' },
+  datetime:    { label:'Date/Time',   color:'#EF4444', bg:'#FEE2E2', desc:'Auto-generated date/time stamps at doc creation' },
+};
+
+const ALL_FIELDS = [
+  { key:'client_name',         type:'org_custom',  label:'Client Company Name',      desc:'Legal entity name from CRM account record' },
+  { key:'client_address',      type:'org_custom',  label:'Client Street Address',    desc:'Billing street address on file in CRM' },
+  { key:'client_city_state',   type:'org_custom',  label:'City / State / ZIP',       desc:'City, state and postal code' },
+  { key:'client_country',      type:'org_custom',  label:'Client Country',           desc:'Country for international agreement headers' },
+  { key:'client_phone',        type:'org_custom',  label:'Client Phone',             desc:'Primary contact phone from CRM account' },
+  { key:'client_website',      type:'org_custom',  label:'Client Website',           desc:'Primary website URL from CRM account' },
+  { key:'client_industry',     type:'org_custom',  label:'Client Industry',          desc:'Industry vertical from CRM account field' },
+  { key:'client_size',         type:'org_custom',  label:'Client Company Size',      desc:'Employee count / size tier from CRM' },
+  { key:'org_display_name',    type:'org_name',    label:'Red Wireless Entity Name', desc:'Auto-populated RW legal entity per region' },
+  { key:'deal_title',          type:'deal_custom', label:'Deal / Project Title',     desc:'Short engagement name from opportunity' },
+  { key:'deal_value',          type:'deal_custom', label:'Total Contract Value',     desc:'TCV in USD from opportunity record' },
+  { key:'deal_start_date',     type:'deal_custom', label:'Project Start Date',       desc:'Contracted engagement start date' },
+  { key:'deal_end_date',       type:'deal_custom', label:'Project End Date',         desc:'Contracted end / go-live date' },
+  { key:'deal_type',           type:'deal_custom', label:'Deal Type',                desc:'New Business / Expansion / Renewal' },
+  { key:'deal_owner',          type:'deal_custom', label:'Account Executive',        desc:'Owning AE name from CRM opportunity' },
+  { key:'deal_stage',          type:'deal_custom', label:'CRM Pipeline Stage',       desc:'Pipeline stage at document creation time' },
+  { key:'payment_terms',       type:'deal_custom', label:'Payment Terms',            desc:'Net 30 / Net 60 / Upon Signature' },
+  { key:'billing_frequency',   type:'deal_custom', label:'Billing Frequency',        desc:'Monthly / Annual / One-time / Milestone' },
+  { key:'sow_number',          type:'deal_custom', label:'SOW Reference Number',     desc:'Unique SOW ID generated by deal desk system' },
+  { key:'project_description', type:'deal_custom', label:'Project Description',      desc:'Executive summary of engagement scope (AE fills)' },
+  { key:'acceptance_criteria', type:'deal_custom', label:'Acceptance Criteria',      desc:'Sign-off conditions for project completion' },
+  { key:'change_order_policy', type:'deal_custom', label:'Change Order Policy',      desc:'Policy text for scope changes and addenda' },
+  { key:'client_signer_name',  type:'person',      label:'Client Authorized Signer', desc:'Full legal name of client signatory' },
+  { key:'client_signer_title', type:'person',      label:'Client Signer Title',      desc:'Job title / role of signing contact' },
+  { key:'client_signer_email', type:'person',      label:'Client Signer Email',      desc:'Email address for e-signature workflow routing' },
+  { key:'product_name',        type:'product',     label:'Product / Service Name',   desc:'Line item name from CPQ / quote object' },
+  { key:'product_qty',         type:'product',     label:'Quantity',                 desc:'Unit quantity on the line item' },
+  { key:'product_unit_price',  type:'product',     label:'Unit Price',               desc:'Per-unit price from CPQ pricing engine' },
+  { key:'product_subtotal',    type:'product',     label:'Line Subtotal',            desc:'Calculated: quantity × unit price' },
+  { key:'product_sku',         type:'product',     label:'Product SKU / ID',         desc:'Internal SKU or catalog identifier' },
+  { key:'product_description', type:'product',     label:'Product Description',      desc:'Full description text from product catalog' },
+  { key:'product_category',    type:'product',     label:'Product Category',         desc:'Category for grouping on invoice / quote' },
+  { key:'product_license',     type:'product',     label:'License Type',             desc:'Perpetual / Subscription / Usage-based' },
+  { key:'doc_date',            type:'datetime',    label:'Document Date',            desc:'Auto-generated timestamp at doc creation' },
+];
+
+// ── helper refs used in seIntel ──────────────────────────────────────────────
+const AUTO_ALL = ['org_display_name','client_name','client_address','client_city_state','client_phone','client_website','client_industry','client_size','deal_title','deal_value','deal_start_date','deal_end_date','deal_type','deal_owner','deal_stage','payment_terms','billing_frequency','sow_number','product_name','product_qty','product_unit_price','product_subtotal','product_sku','product_category','product_license','doc_date','client_signer_name','client_signer_title','client_signer_email'];
+const REVIEW_SCOPE = ['project_description','acceptance_criteria','change_order_policy'];
+
+const TEMPLATES = [
+// ── 1. SOW – Implementation ──────────────────────────────────────────────────
+{ id:'sow_implementation', label:'SOW – Implementation', category:'SOW',
+  description:'Standard Statement of Work for new platform implementation engagements. Covers scope, deliverables, timeline, pricing, and acceptance criteria.',
+  sections:[
+    { id:'cover', title:'Cover Page', defaultOpen:true, blocks:[
+      { type:'heading', text:'Statement of Work' },
+      { type:'paragraph', text:'This Statement of Work ("SOW") is entered into between {{org_display_name}} ("Red Wireless") and {{client_name}} ("Client"), effective {{doc_date}}, and is governed by the Master Services Agreement on file.', fields:['org_display_name','client_name','doc_date'] },
+      { type:'callout', text:'SOW #{{sow_number}} · Deal Type: {{deal_type}} · AE: {{deal_owner}} · Stage: {{deal_stage}}', fields:['sow_number','deal_type','deal_owner','deal_stage'] },
+    ]},
+    { id:'parties', title:'Parties & Contact Details', defaultOpen:false, blocks:[
+      { type:'table', headers:['Field','Client','Red Wireless'], rows:[
+        ['Legal Name','{{client_name}}','{{org_display_name}}'],
+        ['Address','{{client_address}}','Refer to signature block'],
+        ['City / State / ZIP','{{client_city_state}}','—'],
+        ['Phone','{{client_phone}}','—'],
+        ['Website','{{client_website}}','redwireless.com'],
+        ['Industry','{{client_industry}}','Wireless / Technology'],
+      ], fields:['client_name','org_display_name','client_address','client_city_state','client_phone','client_website','client_industry'] },
+    ]},
+    { id:'scope', title:'Scope of Work', defaultOpen:false, blocks:[
+      { type:'paragraph', text:'{{project_description}}', fields:['project_description'] },
+      { type:'list', items:['Discovery: requirements gathering, stakeholder workshops, and current-state analysis','Configuration: platform setup, integrations, and workflow automation build-out','Testing: unit testing, integration testing, and user acceptance testing (UAT)','Go-live: deployment to production, hypercare support, and knowledge transfer'], fields:[] },
+    ]},
+    { id:'deliverables', title:'Deliverables & Timeline', defaultOpen:false, blocks:[
+      { type:'table', headers:['Milestone','Target Date','Owner','Notes'], rows:[
+        ['Project Kickoff','{{deal_start_date}}','Red Wireless','Kickoff deck + RACI delivered'],
+        ['Discovery Complete','TBD','Red Wireless','Requirements doc signed off by Client'],
+        ['Configuration Build','TBD','Red Wireless','UAT environment available'],
+        ['UAT Sign-off','TBD','Client','Written acceptance required'],
+        ['Production Go-live','{{deal_end_date}}','Red Wireless','Hypercare begins (30 days)'],
+      ], fields:['deal_start_date','deal_end_date'] },
+    ]},
+    { id:'pricing', title:'Pricing & Payment', defaultOpen:false, blocks:[
+      { type:'table', headers:['Product / Service','SKU','Category','Qty','Unit Price','Subtotal'], rows:[
+        ['{{product_name}}','{{product_sku}}','{{product_category}}','{{product_qty}}','{{product_unit_price}}','{{product_subtotal}}'],
+      ], fields:['product_name','product_sku','product_category','product_qty','product_unit_price','product_subtotal'] },
+      { type:'callout', text:'Total Contract Value: {{deal_value}} · Payment Terms: {{payment_terms}} · Billing: {{billing_frequency}}', fields:['deal_value','payment_terms','billing_frequency'] },
+    ]},
+    { id:'acceptance', title:'Acceptance Criteria & Change Orders', defaultOpen:false, blocks:[
+      { type:'paragraph', text:'Project completion is subject to the following acceptance criteria: {{acceptance_criteria}}', fields:['acceptance_criteria'] },
+      { type:'paragraph', text:'Change Order Policy: {{change_order_policy}}', fields:['change_order_policy'] },
+    ]},
+    { id:'signatures', title:'Authorized Signatures', defaultOpen:false, blocks:[
+      { type:'signature', parties:[
+        { role:'Client', name:'{{client_signer_name}}', title:'{{client_signer_title}}', email:'{{client_signer_email}}' },
+        { role:'Red Wireless', name:'[RW Authorized Signer]', title:'Director, Solutions Engineering', email:'contracts@redwireless.com' },
+      ], fields:['client_signer_name','client_signer_title','client_signer_email'] },
+    ]},
+  ],
+  seIntel:{
+    modules:['Document Generation','CRM Integration','E-Signature Routing','Deal Desk Automation','AI Field Population'],
+    solutionAreas:['Implementation SOW','SaaS Onboarding','Deal Desk Automation','CRM-Driven Document Generation','Contract Lifecycle Management'],
+    hoursByRole:{ ba:8, frontDev:4, backDev:12, design:2, data:4, product:4, tpm:8, sa:16 },
+    risk:'Medium', riskNotes:'Complex field mapping from CRM opportunity; acceptance criteria and change order language require AE / legal review.',
+    typicalDuration:'1–2 sprints (2–4 wks)', aiConfidence:'High',
+    agentifyPipeline:{
+      trigger:'Deal reaches "Verbal Commit" stage in HubSpot CRM',
+      dataSource:'HubSpot Deal + Contact + Company objects; CPQ line items via HubSpot Products',
+      reviewGate:'AE review of scope/description → Legal approval if non-standard terms detected',
+      outputFormat:'PDF delivered via DocuSign envelope; DOCX backup stored in SharePoint deal folder',
+      notes:'~85% auto-population rate. project_description, acceptance_criteria, change_order_policy require AE input. Agentify flags blank required fields before routing.'
+    },
+    autoPopulateFields:AUTO_ALL.filter(f => !REVIEW_SCOPE.includes(f)),
+    reviewRequiredFields:REVIEW_SCOPE,
+  }
+},
+
+// ── 2. SOW – Workmate ────────────────────────────────────────────────────────
+{ id:'workmate_sow', label:'SOW – Workmate', category:'SOW',
+  description:'Statement of Work for Workmate product implementation. Covers product-specific configuration, integrations, and user onboarding.',
+  sections:[
+    { id:'cover', title:'Cover Page', defaultOpen:true, blocks:[
+      { type:'heading', text:'Workmate Implementation – Statement of Work' },
+      { type:'paragraph', text:'Prepared by {{org_display_name}} for {{client_name}} · Effective {{doc_date}} · SOW #{{sow_number}}', fields:['org_display_name','client_name','doc_date','sow_number'] },
+      { type:'callout', text:'AE: {{deal_owner}} · TCV: {{deal_value}} · Start: {{deal_start_date}} · End: {{deal_end_date}}', fields:['deal_owner','deal_value','deal_start_date','deal_end_date'] },
+    ]},
+    { id:'product_overview', title:'Workmate Product Overview', defaultOpen:false, blocks:[
+      { type:'paragraph', text:'Workmate is Red Wireless\'s AI-powered workforce management platform. This engagement covers the configuration and deployment of the following licensed modules for {{client_name}}:', fields:['client_name'] },
+      { type:'list', items:['Scheduling & Shift Management','Time & Attendance Tracking','AI-Driven Demand Forecasting','Manager Mobile App','Employee Self-Service Portal','Payroll Integration Connector'], fields:[] },
+      { type:'callout', text:'License Type: {{product_license}} · Category: {{product_category}}', fields:['product_license','product_category'] },
+    ]},
+    { id:'impl_scope', title:'Implementation Scope', defaultOpen:false, blocks:[
+      { type:'paragraph', text:'{{project_description}}', fields:['project_description'] },
+      { type:'table', headers:['Phase','Activities','Duration'], rows:[
+        ['Phase 1 – Discovery','Requirements workshops, data mapping, API inventory','2 weeks'],
+        ['Phase 2 – Configuration','Module setup, SSO/LDAP integration, data migration','3 weeks'],
+        ['Phase 3 – Testing','UAT facilitation, defect remediation, perf testing','2 weeks'],
+        ['Phase 4 – Go-live','Cutover, hypercare, admin training','1 week'],
+      ], fields:[] },
+    ]},
+    { id:'pricing', title:'Pricing', defaultOpen:false, blocks:[
+      { type:'table', headers:['Item','SKU','Qty','Unit Price','Subtotal'], rows:[
+        ['{{product_name}}','{{product_sku}}','{{product_qty}}','{{product_unit_price}}','{{product_subtotal}}'],
+      ], fields:['product_name','product_sku','product_qty','product_unit_price','product_subtotal'] },
+      { type:'callout', text:'TCV: {{deal_value}} · Terms: {{payment_terms}} · Frequency: {{billing_frequency}}', fields:['deal_value','payment_terms','billing_frequency'] },
+    ]},
+    { id:'signatures', title:'Signatures', defaultOpen:false, blocks:[
+      { type:'signature', parties:[
+        { role:'Client', name:'{{client_signer_name}}', title:'{{client_signer_title}}', email:'{{client_signer_email}}' },
+        { role:'Red Wireless', name:'[RW Authorized Signer]', title:'VP, Customer Success', email:'contracts@redwireless.com' },
+      ], fields:['client_signer_name','client_signer_title','client_signer_email'] },
+    ]},
+  ],
+  seIntel:{
+    modules:['Document Generation','CRM Integration','E-Signature Routing','Workflow Orchestration','AI Field Population','Customer Onboarding'],
+    solutionAreas:['Workmate SOW','SaaS Onboarding','Product-Specific SOW','Workforce Management','Customer Onboarding Docs'],
+    hoursByRole:{ ba:10, frontDev:6, backDev:10, design:3, data:6, product:6, tpm:8, sa:12 },
+    risk:'Medium', riskNotes:'Multi-phase timeline; data migration scope can expand. Product license type must match CRM catalog exactly.',
+    typicalDuration:'2–3 sprints (4–6 wks)', aiConfidence:'High',
+    agentifyPipeline:{
+      trigger:'Workmate product line added to HubSpot opportunity AND deal stage = "Contract Sent"',
+      dataSource:'HubSpot Deal + Products; Workmate CPQ module list; Contact record for signer',
+      reviewGate:'SE review of product configuration scope → CS handoff sign-off',
+      outputFormat:'PDF via DocuSign; copy auto-filed to HubSpot deal attachment',
+      notes:'Product module list auto-pulled from CPQ. project_description needs SE narrative. Tight integration with Workmate CS onboarding checklist.'
+    },
+    autoPopulateFields:AUTO_ALL.filter(f => f !== 'project_description' && f !== 'acceptance_criteria' && f !== 'change_order_policy'),
+    reviewRequiredFields:['project_description','acceptance_criteria'],
+  }
+},
+// ── 3. SOW – Support ─────────────────────────────────────────────────────────
+{ id:'support_sow', label:'SOW – Support', category:'SOW',
+  description:'Statement of Work for ongoing support and maintenance services. Defines support tiers, SLA commitments, and incident response protocols.',
+  sections:[
+    { id:'cover', title:'Cover Page', defaultOpen:true, blocks:[
+      { type:'heading', text:'Support Services – Statement of Work' },
+      { type:'paragraph', text:'This SOW ("Support SOW") is between {{org_display_name}} and {{client_name}}, effective {{doc_date}}. SOW #{{sow_number}}.', fields:['org_display_name','client_name','doc_date','sow_number'] },
+      { type:'callout', text:'Support Tier: {{product_name}} · Annual Value: {{deal_value}} · Billing: {{billing_frequency}}', fields:['product_name','deal_value','billing_frequency'] },
+    ]},
+    { id:'support_scope', title:'Support Scope', defaultOpen:false, blocks:[
+      { type:'paragraph', text:'{{project_description}}', fields:['project_description'] },
+      { type:'list', items:['Tier 1 & 2 technical support via support portal and email','Priority incident queue for P1/P2 tickets','Monthly service review calls with dedicated CSM','Patch and minor release management','Knowledge base article maintenance'], fields:[] },
+    ]},
+    { id:'sla_terms', title:'SLA Terms', defaultOpen:false, blocks:[
+      { type:'table', headers:['Priority','Response Time','Resolution Target','Communication'], rows:[
+        ['P1 – Critical (system down)','15 min','4 hours','Hourly updates via phone + Slack'],
+        ['P2 – High (major feature broken)','1 hour','8 hours','Updates every 2 hours'],
+        ['P3 – Medium (degraded performance)','4 hours','3 business days','Email updates daily'],
+        ['P4 – Low (cosmetic / inquiry)','1 business day','10 business days','Email on resolution'],
+      ], fields:[] },
+    ]},
+    { id:'pricing', title:'Pricing', defaultOpen:false, blocks:[
+      { type:'table', headers:['Support Plan','SKU','Qty','Price','Subtotal'], rows:[
+        ['{{product_name}}','{{product_sku}}','{{product_qty}}','{{product_unit_price}}','{{product_subtotal}}'],
+      ], fields:['product_name','product_sku','product_qty','product_unit_price','product_subtotal'] },
+      { type:'callout', text:'TCV: {{deal_value}} · Payment Terms: {{payment_terms}} · Renewal Type: {{billing_frequency}}', fields:['deal_value','payment_terms','billing_frequency'] },
+    ]},
+    { id:'signatures', title:'Signatures', defaultOpen:false, blocks:[
+      { type:'signature', parties:[
+        { role:'Client', name:'{{client_signer_name}}', title:'{{client_signer_title}}', email:'{{client_signer_email}}' },
+        { role:'Red Wireless', name:'[RW Authorized Signer]', title:'Director, Customer Support', email:'support-contracts@redwireless.com' },
+      ], fields:['client_signer_name','client_signer_title','client_signer_email'] },
+    ]},
+  ],
+  seIntel:{
+    modules:['Document Generation','CRM Integration','E-Signature Routing','Support Ticketing','AI Field Population'],
+    solutionAreas:['Support SOW','SLA Documentation','Renewal SOW','Support Contract Automation'],
+    hoursByRole:{ ba:4, frontDev:2, backDev:6, design:1, data:2, product:3, tpm:4, sa:8 },
+    risk:'Low', riskNotes:'Mostly templated. SLA tier selection must match purchased support plan SKU. Renewal automation well-established.',
+    typicalDuration:'< 1 sprint (1–2 wks)', aiConfidence:'High',
+    agentifyPipeline:{
+      trigger:'Support SKU added to renewal opportunity OR new support deal reaches "Closed Won"',
+      dataSource:'HubSpot Deal + Support Products CPQ; Account support tier from CRM',
+      reviewGate:'AE review only; legal pre-approved all standard SLA tiers',
+      outputFormat:'PDF via DocuSign; auto-attached to HubSpot support ticket and deal',
+      notes:'Highest AI confidence in the SOW category. ~92% auto-population. project_description is the only manual field for non-standard scope.'
+    },
+    autoPopulateFields:AUTO_ALL.filter(f => f !== 'project_description' && f !== 'acceptance_criteria' && f !== 'change_order_policy'),
+    reviewRequiredFields:['project_description'],
+  }
+},
+
+// ── 4. SOW – Teifi Bridge ────────────────────────────────────────────────────
+{ id:'teifi_bridge_sow', label:'SOW – Teifi Bridge', category:'SOW',
+  description:'Statement of Work for Teifi Bridge integration layer. Covers API connectivity, field mapping, webhook configuration, and data sync architecture.',
+  sections:[
+    { id:'cover', title:'Cover Page', defaultOpen:true, blocks:[
+      { type:'heading', text:'Teifi Bridge Integration – Statement of Work' },
+      { type:'paragraph', text:'Prepared by {{org_display_name}} for {{client_name}} · Effective {{doc_date}} · SOW #{{sow_number}}', fields:['org_display_name','client_name','doc_date','sow_number'] },
+      { type:'callout', text:'Integration Engagement · AE: {{deal_owner}} · TCV: {{deal_value}} · Industry: {{client_industry}}', fields:['deal_owner','deal_value','client_industry'] },
+    ]},
+    { id:'integration_overview', title:'Integration Overview', defaultOpen:true, blocks:[
+      { type:'paragraph', text:'Teifi Bridge provides a low-code/no-code integration layer connecting {{client_name}}\'s existing systems to the Red Wireless platform via REST APIs, webhooks, and event-driven pipelines.', fields:['client_name'] },
+      { type:'list', items:['Bi-directional CRM sync (HubSpot ↔ Client ERP/CRM)','Real-time webhook event processing','Field mapping and data transformation rules','OAuth 2.0 authentication configuration','Monitoring dashboard and alerting setup','Automated retry logic and dead-letter queue management'], fields:[] },
+    ]},
+    { id:'tech_specs', title:'Technical Specifications', defaultOpen:false, blocks:[
+      { type:'table', headers:['Component','Technology','Owner','Notes'], rows:[
+        ['API Gateway','REST / GraphQL','Red Wireless','TLS 1.3 enforced'],
+        ['Auth Layer','OAuth 2.0 / JWT','Red Wireless','Client provides SSO metadata'],
+        ['Data Transform','JSONata / custom mapper','Red Wireless','Field map doc provided in discovery'],
+        ['Monitoring','Datadog + PagerDuty','Red Wireless','Client adds on-call contact'],
+        ['Error Handling','Dead-letter queue + retry','Red Wireless','SLA: 99.9% uptime for Bridge'],
+      ], fields:[] },
+    ]},
+    { id:'pricing', title:'Pricing', defaultOpen:false, blocks:[
+      { type:'table', headers:['Item','SKU','Qty','Unit Price','Subtotal'], rows:[
+        ['{{product_name}}','{{product_sku}}','{{product_qty}}','{{product_unit_price}}','{{product_subtotal}}'],
+      ], fields:['product_name','product_sku','product_qty','product_unit_price','product_subtotal'] },
+      { type:'callout', text:'TCV: {{deal_value}} · Terms: {{payment_terms}} · License: {{product_license}}', fields:['deal_value','payment_terms','product_license'] },
+    ]},
+    { id:'signatures', title:'Signatures', defaultOpen:false, blocks:[
+      { type:'signature', parties:[
+        { role:'Client', name:'{{client_signer_name}}', title:'{{client_signer_title}}', email:'{{client_signer_email}}' },
+        { role:'Red Wireless', name:'[RW Authorized Signer]', title:'CTO / Head of Integrations', email:'integrations@redwireless.com' },
+      ], fields:['client_signer_name','client_signer_title','client_signer_email'] },
+    ]},
+  ],
+  seIntel:{
+    modules:['CRM Integration','Workflow Orchestration','API Integration','Document Generation','AI Field Population'],
+    solutionAreas:['Teifi Bridge SOW','API Integration','Data Pipeline','Webhook Automation','CRM Integration Layer'],
+    hoursByRole:{ ba:12, frontDev:8, backDev:24, design:2, data:16, product:4, tpm:8, sa:20 },
+    risk:'High', riskNotes:'High technical complexity. Client system access dependencies can delay discovery. Field mapping errors compound downstream. Requires architect-level SE involvement.',
+    typicalDuration:'3–5 sprints (6–10 wks)', aiConfidence:'Medium',
+    agentifyPipeline:{
+      trigger:'Teifi Bridge SKU added to deal AND technical discovery document submitted by SE',
+      dataSource:'HubSpot Deal; SE discovery form (Notion / Jira); Client system architecture doc (manual upload)',
+      reviewGate:'SA technical review → Security review → Legal for API data sharing terms',
+      outputFormat:'PDF via DocuSign with technical addendum (DOCX); API spec sheet auto-attached',
+      notes:'Medium AI confidence due to variable technical scope. Architecture section must be written by SA. Agentify handles standard boilerplate + pricing; SE writes integration scope narrative.'
+    },
+    autoPopulateFields:['org_display_name','client_name','client_address','client_city_state','client_industry','deal_title','deal_value','deal_start_date','deal_end_date','deal_owner','sow_number','payment_terms','billing_frequency','product_name','product_sku','product_qty','product_unit_price','product_subtotal','product_license','doc_date','client_signer_name','client_signer_title','client_signer_email'],
+    reviewRequiredFields:['project_description','acceptance_criteria','change_order_policy'],
+  }
+},
+// ── 5. Enterprise – Workmate ─────────────────────────────────────────────────
+{ id:'enterprise_workmate', label:'Enterprise – Workmate', category:'Enterprise',
+  description:'Enterprise Workmate agreement for large-scale deployments. Includes custom SLAs, dedicated CSM, multi-site configuration, and enterprise pricing schedules.',
+  sections:[
+    { id:'cover', title:'Cover Page', defaultOpen:true, blocks:[
+      { type:'heading', text:'Enterprise Workmate Agreement' },
+      { type:'paragraph', text:'This Enterprise Agreement is entered into between {{org_display_name}} ("Provider") and {{client_name}} ("Enterprise Customer"), effective {{doc_date}}. This agreement supersedes all prior SOWs for Workmate modules.', fields:['org_display_name','client_name','doc_date'] },
+      { type:'callout', text:'Enterprise Deal · TCV: {{deal_value}} · Client Size: {{client_size}} · AE: {{deal_owner}}', fields:['deal_value','client_size','deal_owner'] },
+    ]},
+    { id:'enterprise_scope', title:'Enterprise Scope & Modules', defaultOpen:true, blocks:[
+      { type:'paragraph', text:'{{project_description}}', fields:['project_description'] },
+      { type:'table', headers:['Module','Status','User Limit','Notes'], rows:[
+        ['Scheduling & Shift Management','Included','Unlimited','Multi-location support'],
+        ['Time & Attendance','Included','Unlimited','Biometric integration optional'],
+        ['AI Demand Forecasting','Included','N/A','Custom model training included'],
+        ['Payroll Connector','Included','N/A','ADP / Workday / Paychex'],
+        ['Manager Mobile App','Included','Unlimited','iOS + Android'],
+        ['Analytics & Reporting','Included','Unlimited','Custom dashboard builds'],
+      ], fields:[] },
+    ]},
+    { id:'enterprise_pricing', title:'Enterprise Pricing Schedule', defaultOpen:false, blocks:[
+      { type:'table', headers:['Product','SKU','Qty','Unit Price','Subtotal'], rows:[
+        ['{{product_name}}','{{product_sku}}','{{product_qty}}','{{product_unit_price}}','{{product_subtotal}}'],
+      ], fields:['product_name','product_sku','product_qty','product_unit_price','product_subtotal'] },
+      { type:'callout', text:'Enterprise TCV: {{deal_value}} · Payment: {{payment_terms}} · Billing: {{billing_frequency}}', fields:['deal_value','payment_terms','billing_frequency'] },
+    ]},
+    { id:'custom_terms', title:'Custom Enterprise Terms', defaultOpen:false, blocks:[
+      { type:'paragraph', text:'Acceptance Criteria: {{acceptance_criteria}}', fields:['acceptance_criteria'] },
+      { type:'paragraph', text:'Change Management: {{change_order_policy}}', fields:['change_order_policy'] },
+    ]},
+    { id:'signatures', title:'Signatures', defaultOpen:false, blocks:[
+      { type:'signature', parties:[
+        { role:'Enterprise Customer', name:'{{client_signer_name}}', title:'{{client_signer_title}}', email:'{{client_signer_email}}' },
+        { role:'Red Wireless', name:'[RW Authorized Signer]', title:'CEO / VP Enterprise', email:'enterprise@redwireless.com' },
+      ], fields:['client_signer_name','client_signer_title','client_signer_email'] },
+    ]},
+  ],
+  seIntel:{
+    modules:['Document Generation','CRM Integration','E-Signature Routing','Deal Desk Automation','Pricing Engine','Customer Onboarding','AI Field Population','Workflow Orchestration'],
+    solutionAreas:['Enterprise Workmate','Enterprise Agreement','Large Enterprise Deal','Multi-Site Deployment','Enterprise Pricing','Custom SLA'],
+    hoursByRole:{ ba:16, frontDev:8, backDev:16, design:6, data:8, product:12, tpm:16, sa:24 },
+    risk:'High', riskNotes:'Complex multi-module enterprise scope. Custom pricing requires Deal Desk approval. Non-standard terms common. Long legal review cycle typical.',
+    typicalDuration:'4–6 sprints (8–12 wks)', aiConfidence:'Medium',
+    agentifyPipeline:{
+      trigger:'Enterprise flag set on HubSpot deal AND Deal Desk approves pricing schedule',
+      dataSource:'HubSpot Enterprise Deal; CPQ multi-product quote; Deal Desk approval record; Legal template library',
+      reviewGate:'SE review → Deal Desk pricing sign-off → Legal review → VP Enterprise approval',
+      outputFormat:'PDF via DocuSign with multi-party routing; DOCX redline version for negotiation',
+      notes:'Medium confidence due to heavily customized enterprise terms. Agentify handles pricing table and standard clauses at ~70% accuracy. Custom terms drafted by SE + legal.'
+    },
+    autoPopulateFields:['org_display_name','client_name','client_address','client_city_state','client_industry','client_size','deal_title','deal_value','deal_type','deal_owner','payment_terms','billing_frequency','sow_number','product_name','product_sku','product_qty','product_unit_price','product_subtotal','product_license','doc_date','client_signer_name','client_signer_title','client_signer_email'],
+    reviewRequiredFields:['project_description','acceptance_criteria','change_order_policy'],
+  }
+},
+
+  // ─── TEMPLATE 6: Enterprise SLA ───────────────────────────────────────────
+  { id:'enterprise_sla', label:'Enterprise SLA', category:'SLA',
+    description:'Service Level Agreement for enterprise accounts defining uptime guarantees, response times, escalation tiers, and remedies/credits.',
+    sections:[
+      { id:'cover', title:'Cover Page', defaultOpen:true, blocks:[
+        { type:'heading', text:'Enterprise Service Level Agreement' },
+        { type:'paragraph', text:'This Service Level Agreement ("SLA") is entered into as of {{doc_date}} between Red Wireless, Inc. and {{client_name}}.', fields:['doc_date','client_name'] },
+        { type:'callout', text:'SLA Number: {{sow_number}} | Account Tier: Enterprise | Effective: {{deal_start_date}}', fields:['sow_number','deal_start_date'] },
+      ]},
+      { id:'parties', title:'Parties & Account Details', defaultOpen:false, blocks:[
+        { type:'table', headers:['Field','Red Wireless','Client'], rows:[
+          ['Legal Name','Red Wireless, Inc.','{{org_display_name}}'],
+          ['Address','1800 N Shoreline Blvd, Mountain View, CA','{{client_address}}, {{client_city_state}}'],
+          ['Account Size','—','{{client_size}} employees'],
+          ['Industry','—','{{client_industry}}'],
+          ['Account Owner','{{deal_owner}}','{{client_signer_name}}'],
+        ], fields:['org_display_name','client_address','client_city_state','client_size','client_industry','deal_owner','client_signer_name'] },
+      ]},
+      { id:'service_tiers', title:'Service Tiers & Uptime Guarantees', defaultOpen:false, blocks:[
+        { type:'paragraph', text:'Red Wireless guarantees the following uptime targets for {{org_display_name}} under the {{deal_title}} agreement:', fields:['org_display_name','deal_title'] },
+        { type:'table', headers:['Service Tier','Monthly Uptime SLA','Measurement Window','Exclusions'], rows:[
+          ['Platinum','99.99%','Calendar month','Scheduled maintenance, force majeure'],
+          ['Gold','99.9%','Calendar month','Scheduled maintenance'],
+          ['Standard','99.5%','Calendar month','Scheduled maintenance'],
+        ], fields:[] },
+        { type:'callout', text:'Uptime is calculated as: ((Total Minutes − Downtime Minutes) / Total Minutes) × 100. Scheduled maintenance windows are excluded from downtime calculations.', fields:[] },
+      ]},
+      { id:'response_times', title:'Response & Resolution Times', defaultOpen:false, blocks:[
+        { type:'table', headers:['Severity','Description','Initial Response','Target Resolution'], rows:[
+          ['P1 – Critical','Full outage / data loss','15 minutes','4 hours'],
+          ['P2 – High','Major feature impaired','1 hour','8 hours'],
+          ['P3 – Medium','Minor feature impaired','4 hours','48 hours'],
+          ['P4 – Low','Cosmetic / informational','1 business day','Next release'],
+        ], fields:[] },
+        { type:'paragraph', text:'Support contacts for {{client_name}}: Primary — {{client_signer_name}} ({{client_signer_email}}). All P1 incidents auto-escalate to the Red Wireless VP of Operations.', fields:['client_name','client_signer_name','client_signer_email'] },
+      ]},
+      { id:'remedies', title:'Remedies & Service Credits', defaultOpen:false, blocks:[
+        { type:'table', headers:['Monthly Uptime Achieved','Credit (% of Monthly Fee)'], rows:[
+          ['< 99.99% (Platinum)','10%'],
+          ['< 99.9%','20%'],
+          ['< 99.5%','30%'],
+          ['< 99.0%','50%'],
+        ], fields:[] },
+        { type:'paragraph', text:'Service credits are applied to {{client_name}}\'s next invoice automatically. Maximum credit per calendar month shall not exceed 50% of the monthly recurring fee for the affected service under deal {{deal_title}}.', fields:['client_name','deal_title'] },
+      ]},
+      { id:'signatures', title:'Signatures', defaultOpen:false, blocks:[
+        { type:'signature', text:'Red Wireless Authorized Signatory | {{client_signer_name}}, {{client_signer_title}} – {{client_name}}', fields:['client_signer_name','client_signer_title','client_name'] },
+      ]},
+    ],
+    seIntel:{
+      modules:['SLA Management','CRM Integration','AI Field Population','Document Generation','Customer Onboarding','Workflow Orchestration'],
+      solutionAreas:['Enterprise SLA','Uptime Guarantee','Service Credits','Escalation Management','Enterprise Support','Account Health'],
+      hoursByRole:{ ba:4, frontDev:2, backDev:6, design:1, data:3, product:3, tpm:4, sa:10 },
+      risk:'Medium', riskNotes:'Uptime tiers and credit percentages may require legal sign-off. Ensure selected tier matches contracted product SKU. P1 escalation chain must be validated with Ops.',
+      typicalDuration:'1 sprint (1–2 wks)', aiConfidence:'High',
+      agentifyPipeline:{
+        trigger:'Enterprise deal marked "Closed Won" AND SLA product line item present in CPQ quote',
+        dataSource:'HubSpot Enterprise Deal; CPQ product quote; Legal SLA template library; Support tier config',
+        reviewGate:'SE spot-check uptime tier → Legal sign-off on credit terms → VP Ops approval for P1 escalation chain',
+        outputFormat:'PDF via DocuSign; CSV export of SLA terms to support ticketing system',
+        notes:'High confidence — SLA terms are largely standardized. Custom credit structures or bespoke escalation chains require SE + legal review.'
+      },
+      autoPopulateFields:AUTO_ALL,
+      reviewRequiredFields:['project_description'],
+    }
+  },
+
+  // ─── TEMPLATE 7: Enterprise Enhancements ──────────────────────────────────
+  { id:'enterprise_enhancements', label:'Enterprise Enhancements SOW', category:'SOW',
+    description:'Scoped statement of work for custom feature development, workflow automations, and product enhancements beyond standard Workmate configuration.',
+    sections:[
+      { id:'cover', title:'Cover Page', defaultOpen:true, blocks:[
+        { type:'heading', text:'Enterprise Enhancements – Statement of Work' },
+        { type:'paragraph', text:'This Enhancements SOW ("SOW") dated {{doc_date}} governs custom development services provided by Red Wireless, Inc. to {{client_name}} under the Master Services Agreement.', fields:['doc_date','client_name'] },
+        { type:'callout', text:'SOW #{{sow_number}} | Deal: {{deal_title}} | Est. Value: {{deal_value}} | Owner: {{deal_owner}}', fields:['sow_number','deal_title','deal_value','deal_owner'] },
+      ]},
+      { id:'background', title:'Background & Business Objectives', defaultOpen:false, blocks:[
+        { type:'paragraph', text:'{{client_name}} ({{client_industry}}, {{client_size}} employees) requires enhancements to their {{product_name}} deployment to address the following business objectives:', fields:['client_name','client_industry','client_size','product_name'] },
+        { type:'callout', text:'[SE: Describe client\'s core business objectives, current workflow pain points, and measurable success criteria for enhancements.]', fields:[] },
+      ]},
+      { id:'scope', title:'Enhancement Scope & Requirements', defaultOpen:false, blocks:[
+        { type:'paragraph', text:'The following enhancements are in scope for this SOW. Each item includes a complexity rating and estimated effort.', fields:[] },
+        { type:'callout', text:'[SE: List each enhancement with: (1) Feature name, (2) User story / business need, (3) Acceptance criteria, (4) Complexity (S/M/L/XL), (5) Estimated hours]', fields:[] },
+        { type:'table', headers:['Enhancement','Category','Complexity','Est. Hours','Owner'], rows:[
+          ['Custom Dashboard Widget','Frontend','M','12','Front Dev'],
+          ['Automated Workflow Trigger','Backend','L','20','Back Dev'],
+          ['API Integration (3rd Party)','Integration','XL','40','Back Dev + SA'],
+          ['Data Migration Script','Data','M','16','Data Eng'],
+        ], fields:[] },
+      ]},
+      { id:'deliverables', title:'Deliverables & Acceptance', defaultOpen:false, blocks:[
+        { type:'list', items:[
+          'Deployed custom enhancements to {{client_name}} production environment',
+          'Technical documentation for all custom components',
+          'Unit and integration test coverage ≥ 80%',
+          'Knowledge transfer session with {{client_name}} engineering team',
+          'Post-deployment support period: 30 days',
+        ], fields:['client_name'] },
+        { type:'callout', text:'Acceptance: {{client_name}} has {{acceptance_criteria}} business days from delivery to accept or raise defects. Uncontested deliverables are deemed accepted.', fields:['client_name','acceptance_criteria'] },
+      ]},
+      { id:'pricing', title:'Pricing & Payment', defaultOpen:false, blocks:[
+        { type:'table', headers:['Role','Rate','Est. Hours','Subtotal'], rows:[
+          ['Business Analyst','$175/hr','{{product_qty}}','{{product_subtotal}}'],
+          ['Frontend Developer','$195/hr','—','—'],
+          ['Backend Developer','$210/hr','—','—'],
+          ['Solutions Architect','$225/hr','—','—'],
+          ['Data Engineer','$200/hr','—','—'],
+          ['Project Manager','$165/hr','—','—'],
+        ], fields:['product_qty','product_subtotal'] },
+        { type:'paragraph', text:'Total SOW Value: {{deal_value}}. Payment terms: {{payment_terms}}. Billing frequency: {{billing_frequency}}. SKU: {{product_sku}}.', fields:['deal_value','payment_terms','billing_frequency','product_sku'] },
+      ]},
+      { id:'change_order', title:'Change Order Policy', defaultOpen:false, blocks:[
+        { type:'paragraph', text:'{{change_order_policy}}', fields:['change_order_policy'] },
+        { type:'callout', text:'Any scope changes require a written Change Order executed by both parties before additional work commences. Change Orders must reference this SOW number: {{sow_number}}.', fields:['sow_number'] },
+      ]},
+      { id:'signatures', title:'Signatures', defaultOpen:false, blocks:[
+        { type:'signature', text:'Red Wireless Authorized Signatory | {{client_signer_name}}, {{client_signer_title}} – {{client_name}} ({{client_signer_email}})', fields:['client_signer_name','client_signer_title','client_name','client_signer_email'] },
+      ]},
+    ],
+    seIntel:{
+      modules:['Document Generation','CRM Integration','AI Field Population','Deal Desk Automation','Engineering Scoping','Workflow Orchestration','Custom Development Tracking','E-Signature Routing'],
+      solutionAreas:['Enterprise Enhancements','Custom Development','API Integration','Data Migration','Workflow Automation','Enterprise Workmate','Feature Engineering'],
+      hoursByRole:{ ba:20, frontDev:16, backDev:24, design:8, data:12, product:8, tpm:16, sa:20 },
+      risk:'High', riskNotes:'Enhancement scope frequently expands mid-project. Custom development requires precise acceptance criteria upfront. 3rd-party API integrations introduce external dependency risk.',
+      typicalDuration:'3–6 sprints (6–12 wks)', aiConfidence:'Medium',
+      agentifyPipeline:{
+        trigger:'Enhancement opportunity flagged in HubSpot AND CPQ quote includes custom dev SKU',
+        dataSource:'HubSpot Deal; CPQ quote; Engineering estimation tool; Previous SOWs for same client',
+        reviewGate:'SE scoping review → Engineering capacity check → Deal Desk margin approval → Legal → VP sign-off',
+        outputFormat:'DOCX redline for negotiation; PDF final via DocuSign; Jira epic auto-created on signature',
+        notes:'Medium confidence — standard terms auto-populated at ~80%. Enhancement scope table requires SE + engineering input. Acceptance criteria must be SE-authored.'
+      },
+      autoPopulateFields:['org_display_name','client_name','client_address','client_city_state','client_industry','client_size','deal_title','deal_value','deal_type','deal_owner','payment_terms','billing_frequency','sow_number','product_name','product_sku','product_qty','product_unit_price','product_subtotal','doc_date','client_signer_name','client_signer_title','client_signer_email'],
+      reviewRequiredFields:['project_description','acceptance_criteria','change_order_policy'],
+    }
+  },
+
+  // ─── TEMPLATE 8: Proposal ─────────────────────────────────────────────────
+  { id:'proposal', label:'Sales Proposal', category:'Proposal',
+    description:'Pre-sales solution proposal combining executive summary, recommended solution, ROI projections, and pricing — the primary handoff from AE to SE for document automation.',
+    sections:[
+      { id:'cover', title:'Executive Cover', defaultOpen:true, blocks:[
+        { type:'heading', text:'Solution Proposal for {{client_name}}' },
+        { type:'paragraph', text:'Prepared by {{deal_owner}} | {{doc_date}} | Opportunity: {{deal_title}}', fields:['deal_owner','doc_date','deal_title'] },
+        { type:'callout', text:'Proposed Value: {{deal_value}} | Start: {{deal_start_date}} | Products: {{product_name}}', fields:['deal_value','deal_start_date','product_name'] },
+      ]},
+      { id:'executive_summary', title:'Executive Summary', defaultOpen:false, blocks:[
+        { type:'paragraph', text:'{{org_display_name}} ({{client_industry}}, {{client_size}} employees) faces challenges that Red Wireless Workmate is uniquely positioned to solve. This proposal outlines our recommended solution, implementation approach, and expected business outcomes.', fields:['org_display_name','client_industry','client_size'] },
+        { type:'callout', text:'[SE: 2–3 sentences on the prospect\'s specific pain points, why they are evaluating Workmate, and the primary champion/decision-maker\'s stated goals.]', fields:[] },
+      ]},
+      { id:'company_overview', title:'About Red Wireless', defaultOpen:false, blocks:[
+        { type:'paragraph', text:'Red Wireless is the leading enterprise communications platform serving over 500 enterprise customers globally. Our Workmate platform combines AI-powered workflows, real-time analytics, and seamless CRM integrations to drive measurable operational efficiency.', fields:[] },
+        { type:'list', items:[
+          '500+ enterprise customers globally',
+          '99.99% platform uptime SLA',
+          'SOC 2 Type II certified',
+          'Native integrations with Salesforce, HubSpot, SAP, and 50+ platforms',
+          'Average 40% reduction in manual administrative work',
+        ], fields:[] },
+      ]},
+      { id:'solution', title:'Recommended Solution', defaultOpen:false, blocks:[
+        { type:'paragraph', text:'Based on our discovery sessions with {{client_name}}, we recommend the following solution configuration:', fields:['client_name'] },
+        { type:'table', headers:['Product / Module','Description','Qty','Unit Price','Total'], rows:[
+          ['{{product_name}}','Core platform license','{{product_qty}}','{{product_unit_price}}','{{product_subtotal}}'],
+          ['Implementation Services','Onboarding + configuration','1','Included','—'],
+          ['Enterprise SLA – Gold','99.9% uptime guarantee','1','See SLA','—'],
+        ], fields:['product_name','product_qty','product_unit_price','product_subtotal'] },
+        { type:'callout', text:'Total Annual Value: {{deal_value}} | Category: {{product_category}} | License Type: {{product_license}}', fields:['deal_value','product_category','product_license'] },
+      ]},
+      { id:'roi', title:'ROI & Business Case', defaultOpen:false, blocks:[
+        { type:'paragraph', text:'Based on {{client_name}}\'s current workflow metrics and {{client_size}}-person organization, Red Wireless projects the following return on investment within the first 12 months:', fields:['client_name','client_size'] },
+        { type:'table', headers:['Metric','Current Baseline','Post-Workmate','Improvement'], rows:[
+          ['Manual data entry hours/week','~40 hrs','~8 hrs','80% reduction'],
+          ['Document turnaround time','3–5 days','2–4 hours','10× faster'],
+          ['CRM data accuracy','~70%','~97%','38% improvement'],
+          ['Contract cycle time','12 days avg','3 days avg','75% reduction'],
+        ], fields:[] },
+        { type:'callout', text:'[SE: Replace baseline metrics with data gathered during discovery. Use client-provided numbers where possible for maximum credibility.]', fields:[] },
+      ]},
+      { id:'timeline', title:'Proposed Timeline', defaultOpen:false, blocks:[
+        { type:'table', headers:['Phase','Activities','Duration','Owner'], rows:[
+          ['Phase 1: Kickoff','Stakeholder alignment, system access, configuration review','Week 1','SE + Client'],
+          ['Phase 2: Configuration','Workmate setup, CRM integration, user provisioning','Weeks 2–3','Red Wireless'],
+          ['Phase 3: UAT','User acceptance testing, feedback cycles','Week 4','Client + SE'],
+          ['Phase 4: Go-Live','Production launch, hypercare support','Week 5','Red Wireless'],
+          ['Phase 5: Optimization','30-day check-in, workflow tuning','Week 8','CSM'],
+        ], fields:[] },
+        { type:'paragraph', text:'Target start date: {{deal_start_date}}. Contract expiry: {{deal_end_date}}.', fields:['deal_start_date','deal_end_date'] },
+      ]},
+      { id:'next_steps', title:'Next Steps', defaultOpen:false, blocks:[
+        { type:'list', items:[
+          'Review and approve this proposal — deadline: TBD',
+          'Execute MSA and SOW documents',
+          'Kick off technical discovery with {{client_name}} IT team',
+          'Schedule executive alignment call with {{client_signer_name}}',
+          'Red Wireless AE: {{deal_owner}} to confirm contract routing',
+        ], fields:['client_name','client_signer_name','deal_owner'] },
+      ]},
+    ],
+    seIntel:{
+      modules:['Document Generation','CRM Integration','AI Field Population','Deal Desk Automation','Proposal Automation','Pricing Engine','ROI Calculator'],
+      solutionAreas:['Sales Proposal','ROI Analysis','Executive Presentation','Pre-Sales Automation','Deal Packaging','Solution Scoping'],
+      hoursByRole:{ ba:6, frontDev:2, backDev:4, design:4, data:4, product:4, tpm:4, sa:20 },
+      risk:'Low', riskNotes:'Proposal content is largely templated. ROI section requires SE input. Pricing table auto-populated from CPQ. Low legal risk — not a binding contract.',
+      typicalDuration:'1–2 days', aiConfidence:'High',
+      agentifyPipeline:{
+        trigger:'HubSpot deal moves to "Proposal Sent" stage OR AE requests proposal generation',
+        dataSource:'HubSpot Deal + Contact; CPQ product quote; ROI calculator tool; Proposal template library',
+        reviewGate:'SE reviews ROI metrics and solution narrative → AE approves before send',
+        outputFormat:'Branded PDF; HTML web proposal link; PowerPoint deck export option',
+        notes:'High confidence — ~85% auto-populated. ROI baselines and solution narrative require SE customization. Agentify uses prior deals in same industry as ROI benchmarks.'
+      },
+      autoPopulateFields:AUTO_ALL,
+      reviewRequiredFields:['project_description'],
+    }
+  },
+
+  // ─── TEMPLATE 9: MSA ──────────────────────────────────────────────────────
+  { id:'msa', label:'Master Services Agreement', category:'MSA',
+    description:'Master Services Agreement establishing the legal framework, governing terms, IP ownership, liability caps, and dispute resolution for all Red Wireless services.',
+    sections:[
+      { id:'cover', title:'Cover Page', defaultOpen:true, blocks:[
+        { type:'heading', text:'Master Services Agreement' },
+        { type:'paragraph', text:'This Master Services Agreement ("Agreement") is entered into as of {{doc_date}} by and between Red Wireless, Inc., a Delaware corporation, and {{org_display_name}} ("Client").', fields:['doc_date','org_display_name'] },
+        { type:'callout', text:'MSA Reference: {{sow_number}} | Client: {{client_name}} | Executed by: {{client_signer_name}}, {{client_signer_title}}', fields:['sow_number','client_name','client_signer_name','client_signer_title'] },
+      ]},
+      { id:'definitions', title:'Definitions', defaultOpen:false, blocks:[
+        { type:'paragraph', text:'In this Agreement, the following defined terms apply to all Statements of Work, Order Forms, and addenda between Red Wireless and {{client_name}}:', fields:['client_name'] },
+        { type:'table', headers:['Term','Definition'], rows:[
+          ['"Services"','Professional services, SaaS access, and support as described in each SOW'],
+          ['"Deliverables"','All work product, configurations, documentation produced under a SOW'],
+          ['"Confidential Information"','Non-public business, technical, and financial information of either party'],
+          ['"Intellectual Property"','Patents, copyrights, trade secrets, and proprietary methods'],
+          ['"Order Form"','A signed document specifying products, quantities, and pricing'],
+        ], fields:[] },
+      ]},
+      { id:'services', title:'Services & Obligations', defaultOpen:false, blocks:[
+        { type:'paragraph', text:'Red Wireless shall provide Services as described in each executed SOW. {{client_name}} shall provide timely access to systems, personnel, and information required for delivery.', fields:['client_name'] },
+        { type:'list', items:[
+          'Red Wireless will assign a dedicated Solutions Architect for enterprise accounts',
+          'Project status updates will be provided at the cadence specified in each SOW',
+          'All Services will be performed by qualified personnel with relevant expertise',
+          'Red Wireless maintains a professional services staff augmentation right under this MSA',
+        ], fields:[] },
+      ]},
+      { id:'ip', title:'Intellectual Property', defaultOpen:false, blocks:[
+        { type:'paragraph', text:'Red Wireless retains all rights to its pre-existing IP, platform, and methodologies. Custom Deliverables developed exclusively for {{client_name}} under a paid SOW vest in {{client_name}} upon full payment. Joint innovations are governed by a separate IP schedule.', fields:['client_name'] },
+        { type:'callout', text:'Platform IP, including Workmate core engine and Agentify automation framework, remains exclusively owned by Red Wireless regardless of customization or configuration performed for Client.', fields:[] },
+      ]},
+      { id:'liability', title:'Liability & Indemnification', defaultOpen:false, blocks:[
+        { type:'table', headers:['Provision','Cap / Terms'], rows:[
+          ['Limitation of Liability','Each party\'s total liability capped at 12 months\' fees paid in the prior year'],
+          ['Consequential Damages','Excluded for both parties (standard carveouts apply)'],
+          ['IP Indemnification','Red Wireless indemnifies Client against 3rd-party IP infringement claims re: platform'],
+          ['Client Indemnification','Client indemnifies Red Wireless for Client-supplied content and data'],
+          ['Insurance','Red Wireless maintains $5M commercial general liability; $2M E&O'],
+        ], fields:[] },
+      ]},
+      { id:'term_termination', title:'Term & Termination', defaultOpen:false, blocks:[
+        { type:'paragraph', text:'This Agreement commences on {{deal_start_date}} and continues until terminated. Either party may terminate for cause upon 30 days written notice of material breach (uncured). {{client_name}} may terminate for convenience with 90 days notice.', fields:['deal_start_date','client_name'] },
+        { type:'callout', text:'Order Forms and SOWs survive MSA termination through their individual expiry dates unless separately terminated per their terms.', fields:[] },
+      ]},
+      { id:'governing_law', title:'Governing Law & Dispute Resolution', defaultOpen:false, blocks:[
+        { type:'paragraph', text:'This Agreement is governed by the laws of the State of California. Disputes shall first be referred to senior management mediation (30 days), then binding arbitration under JAMS rules in San Francisco, CA.', fields:[] },
+      ]},
+      { id:'signatures', title:'Signatures', defaultOpen:false, blocks:[
+        { type:'signature', text:'Red Wireless Authorized Signatory | {{client_signer_name}}, {{client_signer_title}} – {{org_display_name}} ({{client_signer_email}})', fields:['client_signer_name','client_signer_title','org_display_name','client_signer_email'] },
+      ]},
+    ],
+    seIntel:{
+      modules:['Document Generation','CRM Integration','E-Signature Routing','Legal Workflow Automation','AI Field Population'],
+      solutionAreas:['Master Services Agreement','Legal Framework','IP Protection','Liability Management','Enterprise Contracting','Governing Terms'],
+      hoursByRole:{ ba:4, frontDev:1, backDev:4, design:1, data:2, product:2, tpm:4, sa:8 },
+      risk:'High', riskNotes:'MSA is the highest-risk document — sets binding legal terms for entire relationship. Legal must review all non-standard terms. Liability cap and IP clauses are frequently negotiated.',
+      typicalDuration:'2–4 weeks (legal review cycle)', aiConfidence:'Medium',
+      agentifyPipeline:{
+        trigger:'Deal moves to "Contract Review" stage AND MSA is not already on file for this account',
+        dataSource:'HubSpot Account + Deal; Legal MSA template library; Prior MSAs for same parent entity',
+        reviewGate:'SE pre-populates standard fields → Legal reviews all substantive terms → VP Legal approves → CFO signs',
+        outputFormat:'DOCX redline version for negotiation; PDF final execution via DocuSign multi-party',
+        notes:'Medium confidence — party details and dates auto-populated (~60%). All substantive legal terms require Legal review. Agentify flags deviations from standard MSA playbook for attorney review.'
+      },
+      autoPopulateFields:['org_display_name','client_name','client_address','client_city_state','deal_start_date','sow_number','client_signer_name','client_signer_title','client_signer_email','doc_date','deal_owner'],
+      reviewRequiredFields:['project_description','acceptance_criteria','change_order_policy'],
+    }
+  },
+
+  // ─── TEMPLATE 10: Support Overview ────────────────────────────────────────
+  { id:'support_overview', label:'Support Overview', category:'Support',
+    description:'Client-facing support handbook summarizing available support channels, ticket submission process, SLAs, escalation contacts, and self-service resources.',
+    sections:[
+      { id:'cover', title:'Cover Page', defaultOpen:true, blocks:[
+        { type:'heading', text:'Red Wireless Support Overview' },
+        { type:'paragraph', text:'Welcome, {{client_name}}. This guide outlines your support entitlements, contact methods, and escalation paths as of {{doc_date}}.', fields:['client_name','doc_date'] },
+        { type:'callout', text:'Account: {{org_display_name}} | Plan: {{product_name}} | Category: {{product_category}} | Account Owner: {{deal_owner}}', fields:['org_display_name','product_name','product_category','deal_owner'] },
+      ]},
+      { id:'support_channels', title:'Support Channels', defaultOpen:false, blocks:[
+        { type:'table', headers:['Channel','Contact / URL','Hours','Response Target'], rows:[
+          ['Email Support','support@redwireless.com','24/7','P1: 15min | P2: 1hr | P3: 4hr'],
+          ['Phone (P1/P2)','1-800-RED-WIRE','24/7','Immediate'],
+          ['Customer Portal','portal.redwireless.com','24/7','N/A (self-service)'],
+          ['Slack Connect','#{{client_name}}-support','Business hours','P3/P4 only'],
+          ['CSM (Named Account)','{{deal_owner}}','Business hours','Best effort'],
+        ], fields:['client_name','deal_owner'] },
+      ]},
+      { id:'ticket_process', title:'How to Submit a Ticket', defaultOpen:false, blocks:[
+        { type:'list', items:[
+          'Log in to portal.redwireless.com with your {{client_signer_email}} credentials',
+          'Click "New Ticket" and select the affected product: {{product_name}}',
+          'Set priority based on business impact (P1=Critical, P2=High, P3=Medium, P4=Low)',
+          'Attach relevant screenshots, error logs, or screen recordings',
+          'Include {{client_name}} account number in the ticket subject for faster routing',
+        ], fields:['client_signer_email','product_name','client_name'] },
+      ]},
+      { id:'sla_reference', title:'SLA Quick Reference', defaultOpen:false, blocks:[
+        { type:'table', headers:['Priority','Definition','Response Time','Resolution Target'], rows:[
+          ['P1 – Critical','Platform down / data loss','15 minutes','4 hours'],
+          ['P2 – High','Major feature impaired','1 hour','1 business day'],
+          ['P3 – Medium','Minor issue / workaround available','4 hours','3 business days'],
+          ['P4 – Low','Cosmetic / enhancement request','1 business day','Next release'],
+        ], fields:[] },
+      ]},
+      { id:'escalation', title:'Escalation Path', defaultOpen:false, blocks:[
+        { type:'table', headers:['Level','Contact','When to Escalate'], rows:[
+          ['L1','Support Portal / Email','Any new ticket'],
+          ['L2','CSM: {{deal_owner}}','No response within SLA window'],
+          ['L3','VP Customer Success','Unresolved P1 > 4 hours'],
+          ['L4','Red Wireless CTO','Major outage > 8 hours'],
+        ], fields:['deal_owner'] },
+        { type:'paragraph', text:'For {{client_name}} ({{client_industry}}), your named CSM is {{deal_owner}}. Direct escalations: {{client_signer_email}}.', fields:['client_name','client_industry','deal_owner','client_signer_email'] },
+      ]},
+      { id:'resources', title:'Self-Service Resources', defaultOpen:false, blocks:[
+        { type:'list', items:[
+          'Knowledge Base: docs.redwireless.com',
+          'Video Library: academy.redwireless.com',
+          'Status Page: status.redwireless.com',
+          'Community Forum: community.redwireless.com',
+          'Release Notes: docs.redwireless.com/changelog',
+        ], fields:[] },
+      ]},
+    ],
+    seIntel:{
+      modules:['Document Generation','CRM Integration','AI Field Population','Customer Onboarding','Support Ticket Routing'],
+      solutionAreas:['Support Documentation','Customer Success','Onboarding Materials','SLA Reference','Escalation Management','Account Health'],
+      hoursByRole:{ ba:2, frontDev:1, backDev:2, design:2, data:1, product:2, tpm:2, sa:4 },
+      risk:'Low', riskNotes:'Largely informational document. Escalation contacts and SLA tiers must match contracted terms. CSM name must be validated in HubSpot.',
+      typicalDuration:'1–2 days', aiConfidence:'High',
+      agentifyPipeline:{
+        trigger:'Deal moves to "Onboarding" stage OR new support contract created in CRM',
+        dataSource:'HubSpot Contact + Account; Support tier config; CSM assignment record; SLA terms from contract',
+        reviewGate:'CSM spot-check escalation contacts → auto-send to client on deal close',
+        outputFormat:'PDF welcome packet; HTML web version in customer portal; Email attachment',
+        notes:'High confidence — ~92% auto-populated from CRM. Only escalation contact chain requires human validation. Fully automatable for standard plans.'
+      },
+      autoPopulateFields:AUTO_ALL,
+      reviewRequiredFields:[],
+    }
+  },
+
+  // ─── TEMPLATE 11: Enterprise Support Overview ─────────────────────────────
+  { id:'enterprise_support_overview', label:'Enterprise Support Overview', category:'Support',
+    description:'Premium support handbook for enterprise accounts with dedicated TAM, white-glove onboarding, bespoke escalation contacts, QBR cadence, and proactive monitoring commitments.',
+    sections:[
+      { id:'cover', title:'Cover Page', defaultOpen:true, blocks:[
+        { type:'heading', text:'Enterprise Support Overview – {{client_name}}' },
+        { type:'paragraph', text:'This document outlines the premium support program for {{org_display_name}} ({{client_industry}}, {{client_size}} employees) effective {{deal_start_date}}.', fields:['client_name','org_display_name','client_industry','client_size','deal_start_date'] },
+        { type:'callout', text:'Enterprise Account | Product: {{product_name}} | Annual Value: {{deal_value}} | Dedicated TAM: {{deal_owner}}', fields:['product_name','deal_value','deal_owner'] },
+      ]},
+      { id:'dedicated_team', title:'Your Dedicated Red Wireless Team', defaultOpen:false, blocks:[
+        { type:'table', headers:['Role','Name / Contact','Responsibility'], rows:[
+          ['Technical Account Manager (TAM)','{{deal_owner}}','Primary relationship, QBRs, escalations'],
+          ['Implementation Lead','Assigned at kickoff','Configuration, integrations, go-live'],
+          ['Customer Success Manager (CSM)','Assigned at go-live','Adoption, renewals, expansion'],
+          ['Support Engineer (Named)','Assigned post-launch','Technical issue resolution'],
+          ['VP Enterprise Success','Available for exec escalations','Strategic alignment'],
+        ], fields:['deal_owner'] },
+        { type:'paragraph', text:'TAM office hours for {{client_name}}: Weekly sync + ad-hoc via Slack Connect.', fields:['client_name'] },
+      ]},
+      { id:'premium_channels', title:'Premium Support Channels', defaultOpen:false, blocks:[
+        { type:'table', headers:['Channel','Details','Availability'], rows:[
+          ['Dedicated Slack Connect','Private #{{client_name}}-enterprise channel','24/7'],
+          ['Priority Phone Line','Direct TAM line, no queue','Business hours'],
+          ['Emergency Hotline','1-800-RED-WIRE ext. ENTERPRISE','24/7 for P1 only'],
+          ['Video Call (On-Demand)','Zoom with Named Support Engineer','SLA: 2hr scheduling'],
+          ['On-Site Support','Available for P1 per contract','As needed'],
+        ], fields:['client_name'] },
+      ]},
+      { id:'enterprise_sla', title:'Enterprise SLA Terms', defaultOpen:false, blocks:[
+        { type:'table', headers:['Priority','Description','Response','Resolution','Credit'], rows:[
+          ['P1 – Critical','Full outage','10 minutes','2 hours','30% monthly fee'],
+          ['P2 – High','Major degradation','30 minutes','4 hours','15% monthly fee'],
+          ['P3 – Medium','Partial impairment','2 hours','1 business day','5% monthly fee'],
+          ['P4 – Low','Enhancement / cosmetic','4 hours','Next sprint','None'],
+        ], fields:[] },
+        { type:'callout', text:'Enterprise uptime guarantee: 99.99% monthly. Measured against {{product_name}} production environment. Maintenance windows excluded with 72hr advance notice.', fields:['product_name'] },
+      ]},
+      { id:'proactive_monitoring', title:'Proactive Monitoring & Health Checks', defaultOpen:false, blocks:[
+        { type:'list', items:[
+          '24/7 automated platform monitoring with AI anomaly detection',
+          'Monthly account health report delivered to {{client_signer_email}}',
+          'Quarterly Business Review (QBR) with {{client_signer_name}} and Red Wireless VP',
+          'Annual Executive Business Review (EBR) with C-suite alignment',
+          'Proactive capacity planning alerts 60 days before projected limits',
+          'Security posture review included at each QBR cycle',
+        ], fields:['client_signer_email','client_signer_name'] },
+      ]},
+      { id:'onboarding', title:'Enterprise Onboarding Program', defaultOpen:false, blocks:[
+        { type:'table', headers:['Week','Activity','Owner'], rows:[
+          ['Week 1','Executive kickoff + stakeholder mapping','TAM + {{client_signer_name}}'],
+          ['Week 2','Technical environment audit + integration planning','SE + Client IT'],
+          ['Weeks 3–4','Configuration + CRM/data integration','Red Wireless Eng'],
+          ['Week 5','UAT + user training sessions ({{client_size}} users)','SE + Client'],
+          ['Week 6','Go-live + hypercare support (2 weeks)','CSM + Support Eng'],
+          ['Week 8','30-day health check + optimization session','TAM'],
+        ], fields:['client_signer_name','client_size'] },
+      ]},
+      { id:'signatures', title:'Acknowledgment', defaultOpen:false, blocks:[
+        { type:'signature', text:'{{client_signer_name}}, {{client_signer_title}} – {{org_display_name}} ({{client_signer_email}}) acknowledges receipt of this Enterprise Support Overview.', fields:['client_signer_name','client_signer_title','org_display_name','client_signer_email'] },
+      ]},
+    ],
+    seIntel:{
+      modules:['Document Generation','CRM Integration','AI Field Population','Customer Onboarding','Support Ticket Routing','E-Signature Routing','TAM Assignment Automation','QBR Scheduling'],
+      solutionAreas:['Enterprise Support','Dedicated TAM','White-Glove Onboarding','QBR Program','Enterprise SLA','Proactive Monitoring','Account Health'],
+      hoursByRole:{ ba:4, frontDev:2, backDev:4, design:3, data:2, product:4, tpm:4, sa:12 },
+      risk:'Medium', riskNotes:'Enterprise support terms must align precisely with contracted SLA and product SKU. TAM and CSM assignments must be validated in HubSpot before generation. On-site support clause requires VP approval.',
+      typicalDuration:'1 sprint (3–5 days)', aiConfidence:'High',
+      agentifyPipeline:{
+        trigger:'Enterprise deal closed AND product SKU includes enterprise support tier OR dedicated TAM assigned in HubSpot',
+        dataSource:'HubSpot Enterprise Account + Deal; TAM/CSM assignment records; SLA contract; CPQ product config',
+        reviewGate:'TAM reviews escalation contacts → CSM validates onboarding timeline → SE final check',
+        outputFormat:'PDF welcome packet via DocuSign; HTML web version in enterprise portal; Printed binder option for on-site kickoff',
+        notes:'High confidence (~88% auto-populated). Onboarding timeline and dedicated team table require TAM input. QBR cadence auto-set from product tier config.'
+      },
+      autoPopulateFields:AUTO_ALL,
+      reviewRequiredFields:['project_description'],
+    }
+  },
+]; // end TEMPLATES
+
+  // ══════════════════════════════════════════════════════════════════════════
+  // REACT COMPONENTS
+  // ══════════════════════════════════════════════════════════════════════════
+
+  // ── FieldBadge ─────────────────────────────────────────────────────────────
+  function FieldBadge({ fieldKey }) {
+    const fieldDef = ALL_FIELDS.find(f => f.key === fieldKey);
+    if (!fieldDef) return React.createElement('span', {
+      style:{ display:'inline-block', padding:'1px 6px', borderRadius:'4px', fontSize:'11px',
+              background:'#F3F4F6', color:'#6B7280', fontFamily:'monospace', margin:'2px 2px 2px 0' }
+    }, fieldKey);
+    const type = FTYPE[fieldDef.type] || FTYPE.org_custom;
+    return React.createElement('span', {
+      title: `${fieldDef.label} · ${type.desc}`,
+      style:{ display:'inline-flex', alignItems:'center', gap:'3px', padding:'2px 7px',
+              borderRadius:'4px', fontSize:'11px', background: type.bg, color: type.color,
+              fontWeight:600, fontFamily:'monospace', margin:'2px 2px 2px 0',
+              border:`1px solid ${type.color}33`, cursor:'default' }
+    },
+      React.createElement('span', { style:{ width:'6px', height:'6px', borderRadius:'50%', background: type.color, flexShrink:0 } }),
+      `{{${fieldKey}}}`
+    );
+  }
+
+  // ── BlockItem ───────────────────────────────────────────────────────────────
+  function BlockItem({ block }) {
+    const renderFields = (fields) => {
+      if (!fields || fields.length === 0) return null;
+      return React.createElement('div', { style:{ marginTop:'8px', display:'flex', flexWrap:'wrap', gap:'2px' } },
+        fields.map(f => React.createElement(FieldBadge, { key:f, fieldKey:f }))
+      );
+    };
+
+    if (block.type === 'heading') {
+      return React.createElement('div', { className:'block-item' },
+        React.createElement('h3', { style:{ fontSize:'16px', fontWeight:700, color:'#1E293B', margin:'0 0 4px 0' } }, block.text)
+      );
+    }
+
+    if (block.type === 'paragraph') {
+      const parts = (block.text || '').split(/({{[^}]+}})/g);
+      return React.createElement('div', { className:'block-item' },
+        React.createElement('p', { style:{ color:'#374151', lineHeight:'1.6', margin:'0 0 6px 0', fontSize:'13px' } },
+          parts.map((part, i) => {
+            const m = part.match(/^{{(.+)}}$/);
+            if (m) return React.createElement(FieldBadge, { key:i, fieldKey: m[1] });
+            return React.createElement(React.Fragment, { key:i }, part);
+          })
+        ),
+        block.fields && block.fields.length > 0 && React.createElement('div', { style:{ marginTop:'4px', display:'flex', flexWrap:'wrap' } },
+          block.fields.map(f => React.createElement(FieldBadge, { key:f, fieldKey:f }))
+        )
+      );
+    }
+
+    if (block.type === 'callout') {
+      return React.createElement('div', { className:'block-item', style:{
+        background:'#FFFBEB', border:'1px solid #FCD34D', borderRadius:'6px',
+        padding:'10px 12px', fontSize:'12px', color:'#78350F'
+      }},
+        React.createElement('div', { style:{ display:'flex', alignItems:'flex-start', gap:'6px' } },
+          React.createElement('span', { style:{ fontSize:'14px', lineHeight:1 } }, 'ℹ️'),
+          React.createElement('span', { style:{ lineHeight:'1.5' } }, block.text)
+        ),
+        renderFields(block.fields)
+      );
+    }
+
+    if (block.type === 'list') {
+      return React.createElement('div', { className:'block-item' },
+        React.createElement('ul', { style:{ margin:'0', paddingLeft:'20px', fontSize:'13px', color:'#374151', lineHeight:'1.7' } },
+          (block.items || []).map((item, i) => React.createElement('li', { key:i }, item))
+        ),
+        renderFields(block.fields)
+      );
+    }
+
+    if (block.type === 'table') {
+      return React.createElement('div', { className:'block-item', style:{ overflowX:'auto' } },
+        React.createElement('table', { style:{ width:'100%', borderCollapse:'collapse', fontSize:'12px' } },
+          React.createElement('thead', null,
+            React.createElement('tr', null,
+              (block.headers || []).map((h,i) => React.createElement('th', { key:i, style:{
+                padding:'7px 10px', background:'#F1F5F9', border:'1px solid #E2E8F0',
+                textAlign:'left', fontWeight:600, color:'#334155', whiteSpace:'nowrap'
+              }}, h))
+            )
+          ),
+          React.createElement('tbody', null,
+            (block.rows || []).map((row, ri) => React.createElement('tr', { key:ri },
+              row.map((cell, ci) => React.createElement('td', { key:ci, style:{
+                padding:'6px 10px', border:'1px solid #E2E8F0', color:'#374151',
+                background: ri % 2 === 0 ? '#FFFFFF' : '#F8FAFC'
+              }},
+                typeof cell === 'string' && cell.includes('{{')
+                  ? cell.split(/({{[^}]+}})/g).map((p, pi) => {
+                      const m = p.match(/^{{(.+)}}$/);
+                      return m ? React.createElement(FieldBadge, { key:pi, fieldKey: m[1] }) : React.createElement(React.Fragment, { key:pi }, p);
+                    })
+                  : cell
+              ))
+            ))
+          )
+        ),
+        renderFields(block.fields)
+      );
+    }
+
+    if (block.type === 'signature') {
+      return React.createElement('div', { className:'block-item', style:{
+        background:'#F0FDF4', border:'1px solid #86EFAC', borderRadius:'6px', padding:'12px 14px'
+      }},
+        React.createElement('div', { style:{ fontSize:'12px', color:'#166534', marginBottom:'8px', fontWeight:600 } }, '✍️ Signature Block'),
+        React.createElement('div', { style:{ fontSize:'12px', color:'#15803D' } }, block.text),
+        renderFields(block.fields)
+      );
+    }
+
+    return React.createElement('div', { className:'block-item', style:{ color:'#94A3B8', fontStyle:'italic', fontSize:'12px' } },
+      `[Unknown block type: ${block.type}]`
+    );
+  }
+
+  // ── SectionBlock ────────────────────────────────────────────────────────────
+  function SectionBlock({ section, defaultOpen }) {
+    const [open, setOpen] = React.useState(!!defaultOpen);
+    // Fix: sync open state when defaultOpen prop changes (e.g. Expand All toggle)
+    React.useEffect(() => { setOpen(!!defaultOpen); }, [defaultOpen]);
+
+    const totalFields = (section.blocks || []).reduce((acc, b) => {
+      const arr = b.fields || [];
+      return acc + arr.length;
+    }, 0);
+
+    return React.createElement('div', { className:'section-block', style:{
+      border:'1px solid #E2E8F0', borderRadius:'8px', marginBottom:'8px', overflow:'hidden'
+    }},
+      React.createElement('button', {
+        onClick: () => setOpen(o => !o),
+        style:{
+          width:'100%', display:'flex', alignItems:'center', justifyContent:'space-between',
+          padding:'10px 14px', background: open ? '#F8FAFC' : '#FFFFFF',
+          border:'none', cursor:'pointer', textAlign:'left', gap:'8px'
+        }
+      },
+        React.createElement('div', { style:{ display:'flex', alignItems:'center', gap:'8px', flex:1 } },
+          React.createElement('span', { style:{ fontSize:'13px', color: open ? '#1E3A5F' : '#64748B', transform: open ? 'rotate(90deg)' : 'none', transition:'transform 0.15s' } }, '▶'),
+          React.createElement('span', { style:{ fontWeight:600, fontSize:'13px', color:'#1E3A5F' } }, section.title),
+          React.createElement('span', { style:{ fontSize:'11px', color:'#94A3B8', marginLeft:'4px' } },
+            `${(section.blocks || []).length} blocks`
+          )
+        ),
+        totalFields > 0 && React.createElement('span', { style:{
+          fontSize:'11px', background:'#EEF2FF', color:'#6366F1', padding:'2px 8px',
+          borderRadius:'10px', fontWeight:600, whiteSpace:'nowrap'
+        }}, `${totalFields} fields`)
+      ),
+      open && React.createElement('div', { 'data-testid':'section-content', style:{ padding:'12px 16px', borderTop:'1px solid #E2E8F0', background:'#FAFAFA' } },
+        (section.blocks || []).map((block, i) =>
+          React.createElement('div', { key:i, style:{ marginBottom:'12px' } },
+            React.createElement(BlockItem, { block })
+          )
+        )
+      )
+    );
+  }
+
+  // ── SEIntelPanel ────────────────────────────────────────────────────────────
+  function SEIntelPanel({ intel }) {
+    if (!intel) return null;
+    const riskColor = intel.risk === 'High' ? '#DC2626' : intel.risk === 'Medium' ? '#D97706' : '#059669';
+    const riskBg    = intel.risk === 'High' ? '#FEF2F2' : intel.risk === 'Medium' ? '#FFFBEB' : '#F0FDF4';
+    const confColor = intel.aiConfidence === 'High' ? '#059669' : intel.aiConfidence === 'Medium' ? '#D97706' : '#DC2626';
+    const roleLabels = { ba:'BA', frontDev:'Front Dev', backDev:'Back Dev', design:'Design', data:'Data Eng', product:'Product', tpm:'TPM', sa:'SA' };
+    const totalHours = intel.hoursByRole ? Object.values(intel.hoursByRole).reduce((a,b) => a+b, 0) : 0;
+
+    return React.createElement('div', { className:'se-intel-panel', 'data-testid':'se-intel-panel', style:{
+      background:'#0F172A', borderRadius:'10px', padding:'20px', color:'#E2E8F0',
+      marginBottom:'16px'
+    }},
+      // Header row
+      React.createElement('div', { style:{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:'16px', flexWrap:'wrap', gap:'8px' } },
+        React.createElement('div', { style:{ display:'flex', alignItems:'center', gap:'10px' } },
+          React.createElement('span', { style:{ fontSize:'14px', fontWeight:700, color:'#F8FAFC' } }, '🤖 Agentify SE Intelligence'),
+          React.createElement('span', { style:{
+            padding:'3px 10px', borderRadius:'12px', fontSize:'11px', fontWeight:700,
+            background: riskBg, color: riskColor, border:`1px solid ${riskColor}44`
+          }}, `${intel.risk} Risk`),
+          React.createElement('span', { style:{
+            padding:'3px 10px', borderRadius:'12px', fontSize:'11px', fontWeight:700,
+            background:'#1E293B', color: confColor, border:`1px solid ${confColor}44`
+          }}, `AI: ${intel.aiConfidence} Confidence`)
+        ),
+        React.createElement('div', { style:{ display:'flex', gap:'16px', fontSize:'12px', color:'#94A3B8' } },
+          React.createElement('span', null, `⏱ ${intel.typicalDuration}`),
+          React.createElement('span', null, `${totalHours}h est. total`)
+        )
+      ),
+
+      // 3-column grid
+      React.createElement('div', { style:{ display:'grid', gridTemplateColumns:'1fr 1fr 1fr', gap:'12px', marginBottom:'14px' } },
+
+        // Column 1: Modules + Solution Areas
+        React.createElement('div', { style:{ background:'#1E293B', borderRadius:'8px', padding:'12px' } },
+          React.createElement('div', { style:{ fontSize:'11px', fontWeight:700, color:'#94A3B8', textTransform:'uppercase', letterSpacing:'0.08em', marginBottom:'8px' } }, 'Agentify Modules'),
+          React.createElement('div', { style:{ display:'flex', flexWrap:'wrap', gap:'4px', marginBottom:'12px' } },
+            (intel.modules || []).map((m,i) => React.createElement('span', { key:i, 'data-testid':`module-chip-${m.replace(/\s+/g,'-').toLowerCase()}`, style:{
+              fontSize:'10px', padding:'2px 7px', borderRadius:'4px',
+              background:'#312E81', color:'#A5B4FC', fontWeight:600
+            }}, m))
+          ),
+          React.createElement('div', { style:{ fontSize:'11px', fontWeight:700, color:'#94A3B8', textTransform:'uppercase', letterSpacing:'0.08em', marginBottom:'8px' } }, 'Solution Areas'),
+          React.createElement('div', { style:{ display:'flex', flexWrap:'wrap', gap:'4px' } },
+            (intel.solutionAreas || []).map((sa,i) => React.createElement('span', { key:i, style:{
+              fontSize:'10px', padding:'2px 7px', borderRadius:'4px',
+              background:'#0C4A6E', color:'#7DD3FC', fontWeight:600
+            }}, sa))
+          )
+        ),
+
+        // Column 2: Hours by Role
+        React.createElement('div', { style:{ background:'#1E293B', borderRadius:'8px', padding:'12px' } },
+          React.createElement('div', { style:{ fontSize:'11px', fontWeight:700, color:'#94A3B8', textTransform:'uppercase', letterSpacing:'0.08em', marginBottom:'8px' } }, `Hours by Role · ${totalHours}h Total`),
+          React.createElement('div', { style:{ display:'flex', flexDirection:'column', gap:'5px' } },
+            Object.entries(intel.hoursByRole || {}).map(([role, hrs]) => {
+              const pct = totalHours > 0 ? (hrs / totalHours * 100) : 0;
+              return React.createElement('div', { key:role },
+                React.createElement('div', { style:{ display:'flex', justifyContent:'space-between', fontSize:'11px', marginBottom:'2px' } },
+                  React.createElement('span', { style:{ color:'#CBD5E1' } }, roleLabels[role] || role),
+                  React.createElement('span', { style:{ color:'#94A3B8' } }, `${hrs}h`)
+                ),
+                React.createElement('div', { style:{ height:'4px', background:'#334155', borderRadius:'2px', overflow:'hidden' } },
+                  React.createElement('div', { style:{ width:`${pct}%`, height:'100%', background:'#6366F1', borderRadius:'2px' } })
+                )
+              );
+            })
+          )
+        ),
+
+        // Column 3: Agentify Pipeline
+        React.createElement('div', { style:{ background:'#1E293B', borderRadius:'8px', padding:'12px' } },
+          React.createElement('div', { style:{ fontSize:'11px', fontWeight:700, color:'#94A3B8', textTransform:'uppercase', letterSpacing:'0.08em', marginBottom:'8px' } }, 'Agentify Pipeline'),
+          [
+            { icon:'⚡', label:'Trigger', val: intel.agentifyPipeline?.trigger },
+            { icon:'🗄️', label:'Data Source', val: intel.agentifyPipeline?.dataSource },
+            { icon:'🚦', label:'Review Gate', val: intel.agentifyPipeline?.reviewGate },
+            { icon:'📄', label:'Output', val: intel.agentifyPipeline?.outputFormat },
+          ].map(({ icon, label, val }) => val ? React.createElement('div', { key:label, style:{ marginBottom:'8px' } },
+            React.createElement('div', { style:{ fontSize:'10px', color:'#64748B', fontWeight:600, textTransform:'uppercase', letterSpacing:'0.06em' } }, `${icon} ${label}`),
+            React.createElement('div', { style:{ fontSize:'11px', color:'#CBD5E1', lineHeight:'1.4', marginTop:'2px' } }, val)
+          ) : null)
+        )
+      ),
+
+      // Fields footer
+      React.createElement('div', { style:{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'10px' } },
+        React.createElement('div', { style:{ background:'#1E293B', borderRadius:'8px', padding:'10px' } },
+          React.createElement('div', { style:{ fontSize:'10px', fontWeight:700, color:'#059669', textTransform:'uppercase', letterSpacing:'0.08em', marginBottom:'6px' } },
+            `✅ Auto-Populate (${(intel.autoPopulateFields || []).length})`
+          ),
+          React.createElement('div', { style:{ display:'flex', flexWrap:'wrap', gap:'3px' } },
+            (intel.autoPopulateFields || []).map(f => React.createElement('span', { key:f, style:{
+              fontSize:'10px', padding:'1px 6px', borderRadius:'3px',
+              background:'#064E3B', color:'#6EE7B7', fontFamily:'monospace'
+            }}, f))
+          )
+        ),
+        React.createElement('div', { style:{ background:'#1E293B', borderRadius:'8px', padding:'10px' } },
+          React.createElement('div', { style:{ fontSize:'10px', fontWeight:700, color:'#D97706', textTransform:'uppercase', letterSpacing:'0.08em', marginBottom:'6px' } },
+            `⚠️ Review Required (${(intel.reviewRequiredFields || []).length})`
+          ),
+          React.createElement('div', { style:{ display:'flex', flexWrap:'wrap', gap:'3px' } },
+            (intel.reviewRequiredFields || []).map(f => React.createElement('span', { key:f, style:{
+              fontSize:'10px', padding:'1px 6px', borderRadius:'3px',
+              background:'#78350F', color:'#FDE68A', fontFamily:'monospace'
+            }}, f))
+          ),
+          intel.riskNotes && React.createElement('div', { style:{ fontSize:'11px', color:'#F87171', marginTop:'8px', lineHeight:'1.4', borderTop:'1px solid #334155', paddingTop:'6px' } },
+            `📋 ${intel.riskNotes}`
+          )
+        )
+      )
+    );
+  }
+
+  // ── DocumentView ────────────────────────────────────────────────────────────
+  function DocumentView({ template }) {
+    const [expandAll, setExpandAll] = React.useState(false);
+    const [showIntel, setShowIntel] = React.useState(false);
+
+    const totalFields = React.useMemo(() => {
+      const keys = new Set();
+      (template.sections || []).forEach(s =>
+        (s.blocks || []).forEach(b => (b.fields || []).forEach(f => keys.add(f)))
+      );
+      return keys.size;
+    }, [template]);
+
+    const totalBlocks = (template.sections || []).reduce((a, s) => a + (s.blocks || []).length, 0);
+
+    return React.createElement('div', { className:'document-view' },
+      // Document header
+      React.createElement('div', { style:{
+        padding:'16px 20px', background:'linear-gradient(135deg, #1E3A5F 0%, #2D5A8E 100%)',
+        borderRadius:'10px', marginBottom:'14px', color:'white'
+      }},
+        React.createElement('div', { style:{ display:'flex', alignItems:'flex-start', justifyContent:'space-between', gap:'12px', flexWrap:'wrap' } },
+          React.createElement('div', null,
+            React.createElement('div', { style:{ display:'flex', alignItems:'center', gap:'8px', marginBottom:'4px' } },
+              React.createElement('span', { style:{
+                fontSize:'10px', fontWeight:700, background:'rgba(255,255,255,0.15)',
+                padding:'2px 8px', borderRadius:'4px', textTransform:'uppercase', letterSpacing:'0.08em'
+              }}, template.category),
+              template.seIntel?.risk && React.createElement('span', { style:{
+                fontSize:'10px', fontWeight:700, padding:'2px 8px', borderRadius:'4px',
+                background: template.seIntel.risk === 'High' ? '#FEF2F2' : template.seIntel.risk === 'Medium' ? '#FFFBEB' : '#F0FDF4',
+                color: template.seIntel.risk === 'High' ? '#DC2626' : template.seIntel.risk === 'Medium' ? '#D97706' : '#059669'
+              }}, `${template.seIntel.risk} Risk`)
+            ),
+            React.createElement('h2', { style:{ margin:'0 0 4px 0', fontSize:'18px', fontWeight:700 } }, template.label),
+            React.createElement('p', { style:{ margin:0, fontSize:'12px', opacity:0.8, lineHeight:'1.5', maxWidth:'600px' } }, template.description)
+          ),
+          React.createElement('div', { style:{ display:'flex', gap:'8px', alignItems:'flex-start', flexWrap:'wrap' } },
+            React.createElement('div', { style:{ textAlign:'center', background:'rgba(255,255,255,0.1)', borderRadius:'8px', padding:'8px 12px' } },
+              React.createElement('div', { style:{ fontSize:'20px', fontWeight:700 } }, (template.sections || []).length),
+              React.createElement('div', { style:{ fontSize:'10px', opacity:0.7 } }, 'Sections')
+            ),
+            React.createElement('div', { style:{ textAlign:'center', background:'rgba(255,255,255,0.1)', borderRadius:'8px', padding:'8px 12px' } },
+              React.createElement('div', { style:{ fontSize:'20px', fontWeight:700 } }, totalBlocks),
+              React.createElement('div', { style:{ fontSize:'10px', opacity:0.7 } }, 'Blocks')
+            ),
+            React.createElement('div', { style:{ textAlign:'center', background:'rgba(255,255,255,0.1)', borderRadius:'8px', padding:'8px 12px' } },
+              React.createElement('div', { style:{ fontSize:'20px', fontWeight:700 } }, totalFields),
+              React.createElement('div', { style:{ fontSize:'10px', opacity:0.7 } }, 'Fields')
+            )
+          )
+        ),
+        // Action buttons
+        React.createElement('div', { style:{ display:'flex', gap:'8px', marginTop:'12px', flexWrap:'wrap' } },
+          React.createElement('button', {
+            onClick: () => setExpandAll(e => !e),
+            'data-testid': 'expand-all-toggle',
+            style:{
+              padding:'6px 14px', borderRadius:'6px', fontSize:'12px', fontWeight:600, cursor:'pointer',
+              background: expandAll ? 'rgba(255,255,255,0.25)' : 'rgba(255,255,255,0.1)',
+              color:'white', border:'1px solid rgba(255,255,255,0.3)'
+            }
+          }, expandAll ? '⊟ Collapse All' : '⊞ Expand All'),
+          React.createElement('button', {
+            onClick: () => setShowIntel(s => !s),
+            'data-testid': 'se-intel-toggle',
+            style:{
+              padding:'6px 14px', borderRadius:'6px', fontSize:'12px', fontWeight:600, cursor:'pointer',
+              background: showIntel ? '#6366F1' : 'rgba(255,255,255,0.1)',
+              color:'white', border:`1px solid ${showIntel ? '#818CF8' : 'rgba(255,255,255,0.3)'}`
+            }
+          }, showIntel ? '🤖 Hide SE Intel' : '🤖 SE Intel')
+        )
+      ),
+
+      showIntel && React.createElement(SEIntelPanel, { intel: template.seIntel }),
+
+      React.createElement('div', { 'data-testid': 'sections-container' },
+        (template.sections || []).map(section =>
+          React.createElement(SectionBlock, {
+            key: section.id,
+            section,
+            defaultOpen: expandAll ? true : !!section.defaultOpen
+          })
+        )
+      )
+    );
+  }
+
+  // ── MasterFieldList ──────────────────────────────────────────────────────────
+  function MasterFieldList({ templates }) {
+    const [activeType, setActiveType] = React.useState('all');
+    const [search, setSearch] = React.useState('');
+
+    // Count usage of each field across all templates
+    const usageCounts = React.useMemo(() => {
+      const counts = {};
+      templates.forEach(t =>
+        (t.sections || []).forEach(s =>
+          (s.blocks || []).forEach(b =>
+            (b.fields || []).forEach(f => { counts[f] = (counts[f] || 0) + 1; })
+          )
+        )
+      );
+      return counts;
+    }, [templates]);
+
+    const filtered = ALL_FIELDS.filter(f => {
+      const matchType = activeType === 'all' || f.type === activeType;
+      const matchSearch = !search || f.key.includes(search.toLowerCase()) || f.label.toLowerCase().includes(search.toLowerCase());
+      return matchType && matchSearch;
+    });
+
+    return React.createElement('div', { 'data-testid': 'master-field-list' },
+      React.createElement('div', { style:{ marginBottom:'14px' } },
+        React.createElement('h3', { style:{ margin:'0 0 10px 0', fontSize:'15px', fontWeight:700, color:'#1E293B' } }, `Field Registry · ${ALL_FIELDS.length} fields`),
+        React.createElement('input', {
+          type:'text', placeholder:'Search fields…', value:search,
+          onChange: e => setSearch(e.target.value),
+          'data-testid': 'field-search',
+          style:{
+            width:'100%', padding:'8px 12px', borderRadius:'6px',
+            border:'1px solid #E2E8F0', fontSize:'13px', marginBottom:'10px',
+            outline:'none', boxSizing:'border-box'
+          }
+        }),
+        React.createElement('div', { style:{ display:'flex', flexWrap:'wrap', gap:'6px' } },
+          [{ key:'all', label:`All (${ALL_FIELDS.length})`, color:'#64748B', bg:'#F1F5F9' }].concat(
+            Object.entries(FTYPE).map(([k,v]) => ({
+              key:k, label:`${v.label} (${ALL_FIELDS.filter(f=>f.type===k).length})`,
+              color:v.color, bg:v.bg
+            }))
+          ).map(btn => React.createElement('button', {
+            key: btn.key,
+            onClick: () => setActiveType(btn.key),
+            'data-testid': `filter-${btn.key}`,
+            style:{
+              padding:'4px 12px', borderRadius:'20px', fontSize:'11px', fontWeight:600,
+              cursor:'pointer', border:`2px solid ${activeType === btn.key ? btn.color : 'transparent'}`,
+              background: activeType === btn.key ? btn.bg : '#F8FAFC',
+              color: activeType === btn.key ? btn.color : '#64748B'
+            }
+          }, btn.label))
+        )
+      ),
+      React.createElement('div', { style:{ display:'grid', gridTemplateColumns:'repeat(auto-fill, minmax(280px, 1fr))', gap:'8px' } },
+        filtered.map(f => {
+          const type = FTYPE[f.type];
+          const usage = usageCounts[f.key] || 0;
+          return React.createElement('div', { key:f.key, 'data-testid': `field-card-${f.key}`, style:{
+            border:`1px solid ${type.color}33`, borderRadius:'8px', padding:'10px 12px',
+            background:'white', borderLeft:`3px solid ${type.color}`
+          }},
+            React.createElement('div', { style:{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', marginBottom:'4px' } },
+              React.createElement('code', { style:{ fontSize:'11px', color: type.color, fontWeight:700 } }, `{{${f.key}}}`),
+              React.createElement('span', { style:{
+                fontSize:'10px', background: usage > 0 ? '#EEF2FF' : '#F3F4F6',
+                color: usage > 0 ? '#6366F1' : '#9CA3AF',
+                padding:'1px 6px', borderRadius:'8px', fontWeight:600, whiteSpace:'nowrap'
+              }}, usage > 0 ? `${usage}× used` : 'unused')
+            ),
+            React.createElement('div', { style:{ fontSize:'12px', fontWeight:600, color:'#1E293B', marginBottom:'2px' } }, f.label),
+            React.createElement('div', { style:{ fontSize:'11px', color:'#64748B' } }, f.desc || type.desc),
+            React.createElement('span', { style:{
+              display:'inline-block', marginTop:'6px', fontSize:'10px', padding:'1px 6px',
+              borderRadius:'4px', background: type.bg, color: type.color, fontWeight:600
+            }}, type.label)
+          );
+        })
+      ),
+      filtered.length === 0 && React.createElement('div', { style:{ textAlign:'center', padding:'32px', color:'#94A3B8', fontSize:'13px' } }, 'No fields match your filter.')
+    );
+  }
+
+  // ─── App ──────────────────────────────────────────────────────────────────────
+  function App() {
+    const [selectedId, setSelectedId] = React.useState(TEMPLATES[0].id);
+    const [activeTab, setActiveTab]   = React.useState('anatomy');
+    const [sidebarSearch, setSidebarSearch] = React.useState('');
+
+    const selected = TEMPLATES.find(t => t.id === selectedId) || TEMPLATES[0];
+
+    const RISK_COLOR = { Low:'#10B981', Medium:'#F59E0B', High:'#EF4444', Critical:'#DC2626' };
+    const CAT_COLOR  = {
+      sales:'#8B5CF6', legal:'#0EA5E9', commercial:'#F97316',
+      support:'#10B981', technical:'#64748B', proposal:'#EC4899'
+    };
+
+    const filteredTemplates = TEMPLATES.filter(t => {
+      if (!sidebarSearch) return true;
+      return t.label.toLowerCase().includes(sidebarSearch.toLowerCase()) ||
+             t.category.toLowerCase().includes(sidebarSearch.toLowerCase());
+    });
+
+    // Group templates by category for sidebar display
+    const grouped = {};
+    filteredTemplates.forEach(t => {
+      if (!grouped[t.category]) grouped[t.category] = [];
+      grouped[t.category].push(t);
+    });
+
+    const catLabels = {
+      sales:'Sales', legal:'Legal', commercial:'Commercial',
+      support:'Support', technical:'Technical', proposal:'Proposal'
+    };
+
+    return React.createElement('div', { style:{
+      display:'flex', height:'100vh', overflow:'hidden', fontFamily: "'Inter', sans-serif",
+      background:'#F8FAFC'
+    }},
+
+      // ── Sidebar ────────────────────────────────────────────────────────────────
+      React.createElement('aside', { style:{
+        width:'260px', minWidth:'260px', background:'#0F172A', color:'#E2E8F0',
+        display:'flex', flexDirection:'column', overflow:'hidden', borderRight:'1px solid #1E293B'
+      }},
+
+        // Logo / header
+        React.createElement('div', { style:{
+          padding:'16px 14px 12px', borderBottom:'1px solid #1E293B', flexShrink:0
+        }},
+          React.createElement('div', { style:{ display:'flex', alignItems:'center', gap:'8px', marginBottom:'4px' }},
+            React.createElement('span', { style:{ fontSize:'18px' }}, '⚡'),
+            React.createElement('span', { style:{ fontWeight:700, fontSize:'14px', color:'#F1F5F9', letterSpacing:'-0.3px' }}, 'Agentify'),
+            React.createElement('span', { style:{ fontSize:'11px', background:'#312E81', color:'#A5B4FC', padding:'1px 6px', borderRadius:'4px', fontWeight:600 }}, 'SE')
+          ),
+          React.createElement('p', { style:{ fontSize:'10px', color:'#64748B', margin:0, lineHeight:1.4 }}, 'Red Wireless · Doc Anatomy Module')
+        ),
+
+        // Tab switcher
+        React.createElement('div', { style:{ padding:'8px', borderBottom:'1px solid #1E293B', flexShrink:0 }},
+          React.createElement('div', { style:{ display:'flex', background:'#1E293B', borderRadius:'6px', padding:'2px', gap:'2px' }},
+            ['anatomy','fields'].map(tab =>
+              React.createElement('button', {
+                key: tab,
+                'data-testid': `tab-${tab}`,
+                onClick: () => setActiveTab(tab),
+                style:{
+                  flex:1, padding:'5px 0', borderRadius:'4px', border:'none',
+                  fontSize:'11px', fontWeight:600, cursor:'pointer',
+                  background: activeTab === tab ? '#3B82F6' : 'transparent',
+                  color: activeTab === tab ? '#FFF' : '#64748B',
+                  transition:'all 0.15s'
+                }
+              }, tab === 'anatomy' ? '📄 Anatomy' : '🏷 Fields')
+            )
+          )
+        ),
+
+        // Sidebar search (only for anatomy tab)
+        activeTab === 'anatomy' && React.createElement('div', { style:{ padding:'8px 10px', borderBottom:'1px solid #1E293B', flexShrink:0 }},
+          React.createElement('input', {
+            'data-testid': 'sidebar-search',
+            type:'text', placeholder:'Search templates…',
+            value: sidebarSearch,
+            onChange: e => setSidebarSearch(e.target.value),
+            style:{
+              width:'100%', boxSizing:'border-box', background:'#1E293B', border:'1px solid #334155',
+              borderRadius:'5px', padding:'5px 8px', fontSize:'11px', color:'#E2E8F0',
+              outline:'none'
+            }
+          })
+        ),
+
+        // Template list (anatomy) or Field Registry label (fields)
+        React.createElement('div', { style:{ flex:1, overflowY:'auto', padding:'6px 0' }},
+          activeTab === 'fields'
+            ? React.createElement('div', { style:{ padding:'16px 14px', color:'#94A3B8', fontSize:'12px' }},
+                React.createElement('div', { style:{ fontWeight:700, color:'#E2E8F0', fontSize:'13px', marginBottom:'6px' }}, '🏷 Field Registry'),
+                `${ALL_FIELDS.length} fields across ${TEMPLATES.length} templates`
+              )
+            : Object.keys(grouped).map(cat =>
+                React.createElement('div', { key:cat },
+                  React.createElement('div', { style:{
+                    padding:'6px 12px 3px', fontSize:'9px', fontWeight:700, letterSpacing:'0.08em',
+                    textTransform:'uppercase', color:'#475569'
+                  }}, catLabels[cat] || cat),
+                  grouped[cat].map(t => {
+                    const risk = t.seIntel?.risk || 'Low';
+                    const isActive = t.id === selectedId;
+                    return React.createElement('button', {
+                      key: t.id,
+                      'data-testid': `template-btn-${t.id}`,
+                      onClick: () => { setSelectedId(t.id); setActiveTab('anatomy'); },
+                      style:{
+                        width:'100%', textAlign:'left', background: isActive ? '#1E3A5F' : 'transparent',
+                        border:'none', borderLeft: isActive ? '3px solid #3B82F6' : '3px solid transparent',
+                        padding:'7px 12px', cursor:'pointer', display:'flex', alignItems:'center',
+                        gap:'6px', transition:'all 0.12s'
+                      }
+                    },
+                      React.createElement('span', { style:{
+                        width:'7px', height:'7px', borderRadius:'50%', flexShrink:0,
+                        background: RISK_COLOR[risk] || '#94A3B8'
+                      }}),
+                      React.createElement('span', { style:{
+                        fontSize:'11px', fontWeight: isActive ? 700 : 500,
+                        color: isActive ? '#F1F5F9' : '#94A3B8', lineHeight:1.3, flex:1
+                      }}, t.label),
+                      t.seIntel?.aiConfidence === 'High' && React.createElement('span', { style:{
+                        fontSize:'9px', color:'#10B981', fontWeight:700
+                      }}, '✦')
+                    );
+                  })
+                )
+              )
+        ),
+
+        // Footer stats
+        React.createElement('div', { style:{
+          padding:'10px 12px', borderTop:'1px solid #1E293B', flexShrink:0,
+          display:'flex', gap:'12px'
+        }},
+          [
+            { label:'Templates', val: TEMPLATES.length },
+            { label:'Fields', val: ALL_FIELDS.length },
+            { label:'Modules', val: 14 }
+          ].map(s =>
+            React.createElement('div', { key:s.label, style:{ textAlign:'center', flex:1 }},
+              React.createElement('div', { style:{ fontSize:'14px', fontWeight:700, color:'#E2E8F0' }}, s.val),
+              React.createElement('div', { style:{ fontSize:'9px', color:'#475569', fontWeight:600, textTransform:'uppercase', letterSpacing:'0.05em' }}, s.label)
+            )
+          )
+        )
+      ),
+
+      // ── Main Content ───────────────────────────────────────────────────────────
+      React.createElement('main', { style:{ flex:1, overflow:'hidden', display:'flex', flexDirection:'column' }},
+
+        // Top bar
+        React.createElement('div', { style:{
+          padding:'10px 20px', background:'white', borderBottom:'1px solid #E2E8F0',
+          display:'flex', alignItems:'center', gap:'12px', flexShrink:0
+        }},
+          React.createElement('div', { style:{ flex:1 }},
+            React.createElement('span', { style:{ fontSize:'11px', fontWeight:700, color:'#94A3B8', textTransform:'uppercase', letterSpacing:'0.05em' }},
+              activeTab === 'anatomy' ? `Document Anatomy — ` : 'Field Registry'
+            ),
+            activeTab === 'anatomy' && React.createElement('span', { style:{ fontSize:'11px', fontWeight:700, color:'#3B82F6' }}, selected.label)
+          ),
+          activeTab === 'anatomy' && React.createElement('div', { style:{ display:'flex', gap:'6px' }},
+            TEMPLATES.map(t =>
+              React.createElement('button', {
+                key:t.id,
+                'data-testid': `quick-btn-${t.id}`,
+                onClick: () => setSelectedId(t.id),
+                title: t.label,
+                style:{
+                  width:'24px', height:'24px', borderRadius:'50%', border:'2px solid',
+                  borderColor: t.id === selectedId ? '#3B82F6' : 'transparent',
+                  background: RISK_COLOR[t.seIntel?.risk || 'Low'] + '33',
+                  cursor:'pointer', fontSize:'9px', fontWeight:700,
+                  color: RISK_COLOR[t.seIntel?.risk || 'Low']
+                }
+              }, (TEMPLATES.indexOf(t)+1))
+            )
+          )
+        ),
+
+        // Content area
+        React.createElement('div', { style:{ flex:1, overflow:'auto', padding:activeTab === 'anatomy' ? '0' : '20px' }},
+          activeTab === 'anatomy'
+            ? React.createElement(DocumentView, { key: selected.id, template: selected })
+            : React.createElement(MasterFieldList, { templates: TEMPLATES })
+        )
+      )
+    );
+  }
+
+  const rootEl = document.getElementById('root'); const reactRoot = ReactDOM.createRoot(rootEl); reactRoot.render(React.createElement(App));
+</script>
+</body>
+</html>

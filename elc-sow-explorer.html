@@ -1,0 +1,1915 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ELC SOW Explorer — Phase 2A (MAC)</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0f1117;color:#e2e8f0;min-height:100vh}
+::-webkit-scrollbar{width:6px;height:6px}
+::-webkit-scrollbar-track{background:#1e2130}
+::-webkit-scrollbar-thumb{background:#3d4460;border-radius:3px}
+::-webkit-scrollbar-thumb:hover{background:#5a6280}
+.sidebar{position:fixed;left:0;top:0;bottom:0;width:220px;background:#141722;border-right:1px solid #1e2a3a;display:flex;flex-direction:column;z-index:100;overflow-y:auto}
+.main{margin-left:220px;min-height:100vh;display:flex;flex-direction:column}
+.nav-logo{padding:18px 16px 12px;border-bottom:1px solid #1e2a3a}
+.nav-title{font-size:11px;font-weight:700;letter-spacing:2px;color:#6b7eb5;text-transform:uppercase}
+.nav-sub{font-size:13px;font-weight:600;color:#e2e8f0;margin-top:3px}
+.nav-item{display:flex;align-items:center;gap:10px;padding:9px 16px;cursor:pointer;font-size:13px;color:#8896b0;border-left:3px solid transparent;transition:all .15s}
+.nav-item:hover{background:#1e2535;color:#c8d6f0}
+.nav-item.active{background:#1a2744;color:#7eb8ff;border-left-color:#4d8aff;font-weight:600}
+.nav-section{padding:12px 16px 4px;font-size:10px;font-weight:700;letter-spacing:1.5px;color:#3d4f6e;text-transform:uppercase}
+.page-header{background:linear-gradient(135deg,#141f35 0%,#0f1628 100%);padding:24px 32px 20px;border-bottom:1px solid #1e2a3a;flex-shrink:0}
+.page-title{font-size:22px;font-weight:700;color:#fff}
+.page-desc{font-size:13px;color:#6b7eb5;margin-top:4px}
+.content{padding:24px 32px;flex:1;overflow-y:auto}
+.card{background:#141f35;border:1px solid #1e2a3a;border-radius:10px;padding:18px;transition:border-color .2s}
+.card:hover{border-color:#2d3d5a}
+.tag{display:inline-flex;align-items:center;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:600;letter-spacing:.3px}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;border:none;transition:all .15s}
+.btn-primary{background:#2563eb;color:#fff}
+.btn-primary:hover{background:#1d4ed8}
+.btn-ghost{background:transparent;color:#8896b0;border:1px solid #2d3d5a}
+.btn-ghost:hover{background:#1e2535;color:#c8d6f0}
+.search-input{width:100%;background:#0d1425;border:1px solid #1e2a3a;color:#e2e8f0;padding:8px 12px 8px 36px;border-radius:8px;font-size:13px;outline:none;transition:border-color .2s}
+.search-input:focus{border-color:#2d4a7a}
+.search-wrap{position:relative}
+.search-icon{position:absolute;left:11px;top:50%;transform:translateY(-50%);color:#4d5e80;pointer-events:none}
+.badge{display:inline-flex;align-items:center;padding:2px 7px;border-radius:4px;font-size:11px;font-weight:600}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+.flex{display:flex}
+.flex-col{display:flex;flex-direction:column}
+.items-center{align-items:center}
+.gap-2{gap:8px}
+.gap-3{gap:12px}
+.gap-4{gap:16px}
+.mb-4{margin-bottom:16px}
+.mb-3{margin-bottom:12px}
+.mb-2{margin-bottom:8px}
+.text-sm{font-size:13px}
+.text-xs{font-size:11px}
+.text-muted{color:#6b7eb5}
+.text-white{color:#fff}
+.font-bold{font-weight:700}
+.font-semibold{font-weight:600}
+.rounded{border-radius:8px}
+.p-3{padding:12px}
+.p-4{padding:16px}
+.cursor-pointer{cursor:pointer}
+.hover-card{transition:all .2s;cursor:pointer}
+.hover-card:hover{transform:translateY(-1px);box-shadow:0 4px 20px rgba(0,0,0,.3)}
+.tree-line{border-left:2px solid #1e2a3a;margin-left:8px;padding-left:16px}
+.expand-btn{width:20px;height:20px;border-radius:4px;border:1px solid #2d3d5a;background:#1a2135;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;font-size:12px;color:#6b7eb5;flex-shrink:0;transition:all .15s}
+.expand-btn:hover{background:#243050;color:#a0b4d6}
+.milestone-chip{display:inline-flex;align-items:center;padding:3px 10px;border-radius:4px;font-size:11px;font-weight:600;font-family:monospace;margin:2px}
+.stat-card{background:linear-gradient(135deg,#141f35,#0f1628);border:1px solid #1e2a3a;border-radius:10px;padding:16px 20px}
+.elc-row{padding:10px 12px;border-radius:6px;background:#0d1425;margin:4px 0;border-left:3px solid transparent;font-size:12px;cursor:pointer;transition:all .15s}
+.elc-row:hover{background:#121c35;border-left-color:#4d8aff}
+.elc-id{font-family:monospace;font-weight:700;font-size:11px;color:#7eb8ff;min-width:62px}
+.area-header{padding:8px 12px;background:#141f35;border-radius:6px;margin-bottom:4px;cursor:pointer;display:flex;align-items:center;gap:8px;font-size:12px;font-weight:600;color:#a0b4d6;border:1px solid #1e2a3a}
+.area-header:hover{background:#1a2535}
+.module-chip{display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer;transition:all .2s;border:1px solid transparent}
+.module-chip:hover{opacity:.85}
+.tooltip{position:relative}
+.tooltip:hover::after{content:attr(data-tip);position:absolute;left:50%;bottom:110%;transform:translateX(-50%);background:#0d1425;color:#e2e8f0;font-size:11px;padding:4px 8px;border-radius:4px;white-space:nowrap;border:1px solid #2d3d5a;z-index:999;pointer-events:none}
+.divider{height:1px;background:#1e2a3a;margin:16px 0}
+.section-title{font-size:14px;font-weight:700;color:#c8d6f0;margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.back-btn{display:inline-flex;align-items:center;gap:6px;color:#6b7eb5;font-size:13px;cursor:pointer;margin-bottom:16px;padding:4px 0}
+.back-btn:hover{color:#a0b4d6}
+.detail-panel{background:#0d1425;border:1px solid #1e2a3a;border-radius:8px;padding:16px}
+.vendor-card{background:#141f35;border:1px solid #1e2a3a;border-radius:8px;padding:14px;display:flex;flex-direction:column;gap:6px}
+.pod-card{border-radius:10px;padding:16px;cursor:pointer;transition:all .2s;border:2px solid transparent}
+.pod-card:hover{transform:translateY(-2px)}
+.pod-card.expanded{border-color:currentColor}
+.ms-row{display:flex;align-items:center;gap:10px;padding:7px 10px;border-radius:6px;background:#0d1425;margin:3px 0;font-size:12px}
+.ms-id{font-family:monospace;font-size:11px;font-weight:700;min-width:160px}
+.phase-bar{height:8px;border-radius:4px;background:#1e2a3a;overflow:hidden;margin-top:8px}
+.phase-fill{height:100%;border-radius:4px}
+.tab-bar{display:flex;gap:4px;border-bottom:1px solid #1e2a3a;margin-bottom:20px}
+.tab{padding:8px 16px;font-size:13px;font-weight:600;color:#6b7eb5;cursor:pointer;border-bottom:2px solid transparent;transition:all .15s}
+.tab:hover{color:#a0b4d6}
+.tab.active{color:#7eb8ff;border-bottom-color:#4d8aff}
+.elc-detail-modal{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.7);z-index:500;display:flex;align-items:center;justify-content:center;padding:24px}
+.elc-detail-inner{background:#141f35;border:1px solid #2d4a7a;border-radius:12px;padding:24px;max-width:600px;width:100%;max-height:80vh;overflow-y:auto}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+
+
+// ═══════════════════════════════════════════
+// SOW DATA (generated)
+// ═══════════════════════════════════════════
+
+const SOW_DATA = {
+modules: [
+  {num:0,name:"Discovery & Planning",color:"#475569",pod:"PMO",count:11,areas:["Change Management", "PMM Deprecation Change Management", "Multi-Tenancy & Environment Management", "Omnichannel Order Management", "Security & Compliance", "Critical Report Inventory & Prioritization", "SKU Transformation & Mapping", "Location Master Data"]},
+  {num:1,name:"Platform & Infrastructure",color:"#4f46e5",pod:"E",count:18,areas:["Canonical Data Model Definition", "Multi-Tenancy & Environment Management", "Shopify Organization Setup", "Enterprise SSO & Authentication", "Scope & Permission Management", "DevOps & CI/CD", "Security & Compliance", "Performance & Scalability", "Monitoring & Alerting", "RBAC & Permission Management"]},
+  {num:2,name:"IMS (Pipe17)",color:"#0891b2",pod:"C",count:28,areas:["SOX Compliance & Audit Controls", "DevOps & CI/CD", "Monitoring & Observability", "Enterprise SSO & Authentication", "Unified Inventory Ledger", "Global Unique Identifiers", "Transfer Order Management", "Variance & Adjustment Handling", "Cost Valuation & COGS", "Order Orchestration & Routing", "Inventory Sync & Publishing", "Inventory Reservation & Allocation", "Exception Handling & Monitoring", "Replenishment Integration"]},
+  {num:3,name:"RMS",color:"#d97706",pod:"B",count:48,areas:["Product Master Data", "Location Master Data", "Promotional Inventory & Segmentation", "SOX Compliance & Audit Controls", "Safety Stock Management", "Customer Capture", "Store Operations - Receiving", "Store Operations - Transfers", "Store Operations - Cycle Counts", "Store Operations - Adjustments", "Permissions & Access Control", "PMM Deprecation", "Service & Event Tracking", "Draft Cycle Count Execution & Exception Reporting", "Testing & Validation", "UX / Design"]},
+  {num:4,name:"Checkout Extensions & Cart",color:"#ea580c",pod:"A",count:33,areas:["Canonical Data Model Definition", "SKU Transformation & Mapping", "Change Management", "Store Go-Live Support", "UX / Design", "Bundle & Kit Management", "POS Detection & Channel Logic", "GWP Cart Transforms", "Bundle Cart Transforms", "Promotional Cart Transforms", "Sample & Collateral Cart Transforms", "Personalization Cart Transforms", "Checkout UI Extensions", "Performance & Error Handling"]},
+  {num:5,name:"Loki Integration Strategy",color:"#84cc16",pod:"E",count:25,areas:["GWP Cart Transforms", "Bundle & Kit Management", "Bundle Cart Transforms", "InRiver Core Integration", "Product Data Mapping", "Metafield Strategy", "SKU Transformation & Mapping", "Variant Structure & Grouping", "Loki Enrichment Layer", "Sync Cadence & Strategy", "Error Handling & Monitoring", "Product Lifecycle Management", "Multi-Brand Support"]},
+  {num:6,name:"Omnichannel & Order Mgmt",color:"#0d9488",pod:"C",count:38,areas:["Data Migration & Initial Load", "Testing & Validation", "Documentation & Knowledge Transfer", "Performance & Scalability", "Monitoring & Alerting", "POS Configuration", "Customer Capture", "Sales Attribution", "BOPIS - Store Fulfillment Workflows", "Omni Fulfillment", "Preorders", "Returns Management", "Payment Capture Integration", "OMNI - Ship From Store", "BOPIS - Online Customer Experience", "BOPIS - Notifications & Communication", "BOPIS - Payment & Authorization", "Ship from Store", "Mixed Cart Fulfillment", "Omnichannel Order Management"]},
+  {num:7,name:"Retail Rollout",color:"#e11d48",pod:"A",count:30,areas:["Omnichannel Order Management", "UAT - Financial & Inventory", "Testing & Validation", "Returns Management", "Omnichannel Fulfillment Support", "Endless Aisle (OOFIS)", "POS Configuration", "Return Processing", "Transaction Management", "Store Operations - Transfers", "Cash Management", "Operator Attribution", "Hardware & Infrastructure", "PMM Deprecation", "Change Management", "Donations"]},
+  {num:8,name:"Financial Integration",color:"#7c3aed",pod:"D",count:46,areas:["Donations", "House Accounts", "User Management", "Returns Management", "Ship From Store (Retail Ops)", "UAT - Retail/POS", "Reconciliation & Controls", "Period Boxing & Cutoff", "SAP Financial Integration", "Payment Settlement & DPG", "Order-to-Cash (POS)", "Returns & Refunds", "COGS & Valuation", "GL Mapping & Posting", "SKU Mapping", "Exception Handling", "Multi-MID & Entity Strategy"]},
+  {num:9,name:"Tax Configuration",color:"#059669",pod:"D",count:20,areas:["Gift Card & Multi-Tender", "Intercompany Automation", "Campaign & Promotion Tracking", "Revenue Credit Policy", "Financial Close & Reporting", "Revenue Recognition", "SAP Interface Specifications", "WebMethods Middleware", "Consolidation to Shopify Payments", "Reconciliation & Controls", "Vertex Cloud consolidation (MAC retail + online)", "Tax rule set (US nexus, effective dates, holidays)", "Ongoing updates (rates / rules)", "Multi-Entity Tax Configuration", "UK VAT Configuration"]},
+  {num:10,name:"TalonOne & Staff Discount",color:"#ec4899",pod:"C",count:37,areas:["UK VAT Configuration", "Tax Category Mapping", "Tax Exemption - Certificate Collection", "Tax Exemption - Reporting", "POS Tax Calculation", "Tax Display - Online Checkout", "Tax Display - POS", "SAP Tax Integration", "Vertex Integration", "Tax Reporting - Compliance", "Address Validation", "Testing & Validation", "Configuration Documentation", "Discount Management", "Discount Functions", "Loyalty Integration", "TalonOne API Integration", "Loyalty - Balance Lookup", "Loyalty - Points Redemption", "Loyalty - Points Earning", "Loyalty - Customer Profile", "Staff Discount - Eligibility", "Staff Discount - Application"]},
+  {num:11,name:"Reporting & Data Integration",color:"#0284c7",pod:"D",count:19,areas:["Staff Discount - Reporting", "Promotional Pricing Display", "Bundle Discount Application", "Error Handling - API Failures", "Error Handling - Insufficient Points", "Error Handling - Promo Code Validation", "Offline Scenarios - POS", "Testing & Validation", "Customer Data Sync", "Product Data Sync", "Monitoring & Observability", "TalonOne API Integration", "Change Management", "Staff Discount - Eligibility", "Store Reporting", "Data Replication & Reporting", "Multi-Brand Data Segregation", "Order & Payment Data Replication", "Order Fulfillment Events"]},
+  {num:12,name:"Training & Rollout",color:"#ca8a04",pod:"A",count:31,areas:["SAP Financial Posting Events", "RMS - Store Manager Inventory Dashboard", "Transfer Order Tracking & Audit Trail", "PO Receipt Audit Trail", "Inventory Roll-Forward Report (Store-Level)", "Inventory Roll-Forward Report (DC-Level)", "Settlement to AR to Bank Clearing Report", "Critical Report Inventory & Prioritization", "Canonical Data Model Definition", "Transaction-Level Reconciliation Reports", "Day-1 Critical Reports Identification", "Interim Reporting During Transition", "Batch Analytics & Financial Reporting", "Role-Based Report Access", "Documentation & Knowledge Transfer", "Training Content Development - Troubleshooting & Support", "Train-the-Trainer Program Design", "Train-the-Trainer Session Delivery", "Champion Network Management", "Store Associate Training Delivery", "Store Manager Training Delivery", "District Manager Training", "Merchandising Team Training", "Finance Team Training", "IT Support Team Training", "Marketing Team Training", "Training Materials Creation - Video Tutorials", "Training Materials Creation - Administrator Guides", "Store Rollout Wave Planning", "Pilot Store Selection & Validation", "Hardware Deployment Planning"]},
+],
+items: [
+  {id:"ELC-001",n:1,m:0,area:"Change Management",desc:"Discovery: cross-vendor RACI + delivery governance setup (paid discovery)"},
+  {id:"ELC-002",n:2,m:0,area:"PMM Deprecation Change Management",desc:"Discovery: PMM requirement mapping + deprecation plan + change management"},
+  {id:"ELC-003",n:3,m:0,area:"Multi-Tenancy & Environment Management",desc:"Kickoff planning: environments, access, and release strategy alignment"},
+  {id:"ELC-004",n:4,m:0,area:"Change Management",desc:"Pre-sales discovery already completed: NYC onsite working sessions (Day 1\u20133) + documented validation questions"},
+  {id:"ELC-005",n:5,m:0,area:"Omnichannel Order Management",desc:"Operating model discovery: systems-of-record, exception ownership, and audit-safe controls (cross-cutting)"},
+  {id:"ELC-006",n:6,m:0,area:"Change Management",desc:"Discovery plan (post-SOW): follow-up workshop schedule + agenda pack (ELC-requested sessions)"},
+  {id:"ELC-007",n:7,m:0,area:"Change Management",desc:"Kickoff planning: scope confirmation + phase boundaries + decision log operating model"},
+  {id:"ELC-008",n:8,m:0,area:"Security & Compliance",desc:"Discovery: platform governance, security constraints, and audit trail requirements (ELC Shopify core-service app model)"},
+  {id:"ELC-009",n:9,m:0,area:"Critical Report Inventory & Prioritization",desc:"Discovery: Day-1 critical reports inventory + reporting continuity plan (PMM-to-future transition)"},
+  {id:"ELC-011",n:11,m:0,area:"SKU Transformation & Mapping",desc:"Discovery: SKU structure + 6\u219210 digit transform + mapping ownership (cross-cutting)"},
+  {id:"ELC-012",n:12,m:0,area:"Location Master Data",desc:"Discovery: entity + location structure (brands, legal entities, stores/DCs) and governance"},
+  {id:"ELC-013",n:13,m:1,area:"Canonical Data Model Definition",desc:"Discovery: canonical commerce data model (orders, inventory, returns, payments) + event taxonomy"},
+  {id:"ELC-014",n:14,m:1,area:"Multi-Tenancy & Environment Management",desc:"Ability to support multi-tenanted architecture with separate organizations"},
+  {id:"ELC-015",n:15,m:1,area:"Multi-Tenancy & Environment Management",desc:"Ability to support multiple brands with shared and brand-specific configurations"},
+  {id:"ELC-016",n:16,m:1,area:"Shopify Organization Setup",desc:"Ability to configure a single Shopify Plus organization with 7 brand stores (MAC, Jo Malone, Est\u00e9e Lauder, La Mer, Clinique, Bobbi Brown, Origins)"},
+  {id:"ELC-017",n:17,m:1,area:"Shopify Organization Setup",desc:"Ability to configure Shopify Markets within each brand store to support US and UK market-specific operations"},
+  {id:"ELC-018",n:18,m:1,area:"Enterprise SSO & Authentication",desc:"Ability to integrate ELC's corporate Active Directory with Shopify using SAML 2.0 for employee authentication"},
+  {id:"ELC-019",n:19,m:1,area:"Enterprise SSO & Authentication",desc:"Ability to support SCIM (System for Cross-domain Identity Management) for automated user provisioning and deprovisioning"},
+  {id:"ELC-020",n:20,m:1,area:"Enterprise SSO & Authentication",desc:"Ability to support multi-domain authentication for separate brand-specific login domains"},
+  {id:"ELC-022",n:22,m:1,area:"Scope & Permission Management",desc:"Ability to implement role-based access control (RBAC) using ELC's Shopify core-service app delegated token architecture"},
+  {id:"ELC-024",n:24,m:1,area:"DevOps & CI/CD",desc:"Ability to provision separate Shopify App API keys and secrets per environment"},
+  {id:"ELC-025",n:25,m:1,area:"Security & Compliance",desc:"Ability to enforce TLS 1.3 encryption for all external communication"},
+  {id:"ELC-026",n:26,m:1,area:"Security & Compliance",desc:"Ability to validate HMAC signatures on all Shopify webhook payloads"},
+  {id:"ELC-028",n:28,m:1,area:"Security & Compliance",desc:"Ability to enforce API rate limiting to prevent abuse and ensure fair usage"},
+  {id:"ELC-029",n:29,m:1,area:"Performance & Scalability",desc:"Ability to support peak load during Black Friday with automatic scaling and load testing"},
+  {id:"ELC-030",n:30,m:1,area:"Monitoring & Alerting",desc:"RMS observability + operational runbooks"},
+  {id:"ELC-031",n:31,m:1,area:"Security & Compliance",desc:"RMS security review + access scope validation"},
+  {id:"ELC-032",n:32,m:1,area:"DevOps & CI/CD",desc:"RMS environments + CI/CD + release management"},
+  {id:"ELC-033",n:33,m:1,area:"RBAC & Permission Management",desc:"Consolidated RBAC model for RMS + admin functions"},
+  {id:"ELC-034",n:34,m:2,area:"SOX Compliance & Audit Controls",desc:"Consolidated SOX auditability control suite (logging + immutability + retention + SIEM)"},
+  {id:"ELC-035",n:35,m:2,area:"DevOps & CI/CD",desc:"Consolidated CI/CD + IaC pipeline (Terraform Optional + GitHub Actions)"},
+  {id:"ELC-036",n:36,m:2,area:"Monitoring & Observability",desc:"Consolidated observability (uptime + error telemetry + SIEM forwarding)"},
+  {id:"ELC-037",n:37,m:2,area:"Enterprise SSO & Authentication",desc:"Ability to integrate HR Connect employee lifecycle data for automated POS user provisioning and deprovisioning"},
+  {id:"ELC-038",n:38,m:2,area:"Unified Inventory Ledger",desc:"Ability to serve as single source of truth for all inventory movements across retail. Online inventory for 1P and 3P DC will be imported into Pipe17 via Radial."},
+  {id:"ELC-039",n:39,m:2,area:"Unified Inventory Ledger",desc:"Ability to track committed, available, and on-hand inventory states at location level"},
+  {id:"ELC-040",n:40,m:2,area:"Unified Inventory Ledger",desc:"Ability to maintain complete transaction history with links to triggering events"},
+  {id:"ELC-041",n:41,m:2,area:"Global Unique Identifiers",desc:"Ability to generate globally unique identifiers for all Retail inventory transactions"},
+  {id:"ELC-042",n:42,m:2,area:"Transfer Order Management",desc:"Ability to create transfer orders with unique transfer numbers"},
+  {id:"ELC-043",n:43,m:2,area:"Transfer Order Management",desc:"Ability to track transfer order lifecycle from creation through receipt"},
+  {id:"ELC-044",n:44,m:2,area:"Transfer Order Management",desc:"Ability to support carton-level tracking for multi-carton transfers"},
+  {id:"ELC-045",n:45,m:2,area:"Variance & Adjustment Handling",desc:"Ability to automatically create adjustments for over/under receipts"},
+  {id:"ELC-046",n:46,m:2,area:"Variance & Adjustment Handling",desc:"Ability to capture and map adjustment reason codes to GL accounts"},
+  {id:"ELC-047",n:47,m:2,area:"Variance & Adjustment Handling",desc:"Ability to apply approval workflows for adjustments based on configured thresholds"},
+  {id:"ELC-048",n:48,m:2,area:"Cost Valuation & COGS",desc:"Ability to sync and store standard cost by region from SAP"},
+  {id:"ELC-049",n:49,m:2,area:"Cost Valuation & COGS",desc:"Ability to calculate COGS at fulfillment time using stored standard cost"},
+  {id:"ELC-050",n:50,m:2,area:"Cost Valuation & COGS",desc:"Ability to support cost tracking for inventory adjustments and transfers"},
+  {id:"ELC-051",n:51,m:2,area:"Order Orchestration & Routing",desc:"Ability to receive orders from Shopify in near real-time via webhook"},
+  {id:"ELC-052",n:52,m:2,area:"Order Orchestration & Routing",desc:"Ability to integrate with Radial ROM for order allocation and routing"},
+  {id:"ELC-053",n:53,m:2,area:"Order Orchestration & Routing",desc:"Ability to support flexible node activation/deactivation for fulfillment network"},
+  {id:"ELC-055",n:55,m:2,area:"Inventory Sync & Publishing",desc:"Ability to support real-time or near-real-time store inventory for fulfillment into Radial"},
+  {id:"ELC-056",n:56,m:2,area:"Inventory Sync & Publishing",desc:"Ability to decouple Radial DC inventory by individual location"},
+  {id:"ELC-057",n:57,m:2,area:"Inventory Reservation & Allocation",desc:"Ability to manage inventory holds and reservations for orders"},
+  {id:"ELC-058",n:58,m:2,area:"Inventory Reservation & Allocation",desc:"Ability to handle perpetual inventory for orders in-flight"},
+  {id:"ELC-059",n:59,m:2,area:"Inventory Reservation & Allocation",desc:"Ability to handle inventory allocation timing aligned with remorse window"},
+  {id:"ELC-060",n:60,m:2,area:"Exception Handling & Monitoring",desc:"Ability to handle failed interface postings with retry logic"},
+  {id:"ELC-061",n:61,m:2,area:"Exception Handling & Monitoring",desc:"Ability to provide observability and monitoring for integration health"},
+  {id:"ELC-062",n:62,m:2,area:"Replenishment Integration",desc:"Ability to receive purchase orders and ASNs from SAP for store/DC replenishment"},
+  {id:"ELC-063",n:63,m:3,area:"Product Master Data",desc:"Ability to sync product master data (SKU, UPC, cost) from SAP"},
+  {id:"ELC-064",n:64,m:3,area:"Location Master Data",desc:"Ability to maintain location master for all stores, DCs, and fulfillment nodes"},
+  {id:"ELC-065",n:65,m:3,area:"Promotional Inventory & Segmentation",desc:"Ability to support inventory segmentation for promotions (future Phase 2/3)"},
+  {id:"ELC-066",n:66,m:3,area:"SOX Compliance & Audit Controls",desc:"Ability to support SOX-compliant audit trails for all inventory movements"},
+  {id:"ELC-067",n:67,m:3,area:"Safety Stock Management",desc:"Consolidated safety stock (rules + buffered publishing + report migration)"},
+  {id:"ELC-068",n:68,m:3,area:"Customer Capture",desc:"Ability to enforce minimum required fields for customer capture at POS"},
+  {id:"ELC-070",n:70,m:3,area:"Store Operations - Receiving",desc:"Ability to receive purchase orders at item level with barcode scanning"},
+  {id:"ELC-071",n:71,m:3,area:"Store Operations - Receiving",desc:"Ability to receive purchase orders at carton level with ASN validation"},
+  {id:"ELC-072",n:72,m:3,area:"Store Operations - Receiving",desc:"Ability to process partial receipts for purchase orders"},
+  {id:"ELC-073",n:73,m:3,area:"Store Operations - Receiving",desc:"Ability to capture tracking numbers during inbound receiving process"},
+  {id:"ELC-074",n:74,m:3,area:"Store Operations - Receiving",desc:"Ability to link received goods to original purchase order numbers"},
+  {id:"ELC-075",n:75,m:3,area:"Store Operations - Receiving",desc:"Ability to display enhanced ASN information for multi-carton DC receipts"},
+  {id:"ELC-076",n:76,m:3,area:"Store Operations - Receiving",desc:"Ability to handle over-receiving with automatic adjustment generation"},
+  {id:"ELC-077",n:77,m:3,area:"Store Operations - Receiving",desc:"Ability to handle under-receiving with automatic adjustment generation"},
+  {id:"ELC-078",n:78,m:3,area:"Store Operations - Receiving",desc:"Ability to support in-transit inventory status during receiving workflow"},
+  {id:"ELC-079",n:79,m:3,area:"Store Operations - Transfers",desc:"Ability to create store-to-store transfer orders in RMS"},
+  {id:"ELC-080",n:80,m:3,area:"Store Operations - Transfers",desc:"Ability to generate unique transfer numbers from Pipe17 for tracking"},
+  {id:"ELC-081",n:81,m:3,area:"Store Operations - Transfers",desc:"Ability to capture tracking numbers for outbound store transfers"},
+  {id:"ELC-082",n:82,m:3,area:"Store Operations - Transfers",desc:"Ability to link transfer orders to originating purchase orders"},
+  {id:"ELC-083",n:83,m:3,area:"Store Operations - Transfers",desc:"Ability to receive transfer orders at destination store with ASN validation"},
+  {id:"ELC-084",n:84,m:3,area:"Store Operations - Transfers",desc:"Ability to handle transfer shipment with multiple cartons"},
+  {id:"ELC-085",n:85,m:3,area:"Store Operations - Transfers",desc:"Ability to handle store-to-store transfer variances with adjustment workflow"},
+  {id:"ELC-086",n:86,m:3,area:"Store Operations - Transfers",desc:"Ability to track in-transit inventory for transfers during shipment lifecycle"},
+  {id:"ELC-087",n:87,m:3,area:"Store Operations - Transfers",desc:"Ability to receive DC-to-store transfers with same workflow as store-to-store"},
+  {id:"ELC-088",n:88,m:3,area:"Store Operations - Cycle Counts",desc:"Ability to schedule cycle counts by location and SKU"},
+  {id:"ELC-089",n:89,m:3,area:"Store Operations - Cycle Counts",desc:"Ability to generate physical count sheets for store associates"},
+  {id:"ELC-090",n:90,m:3,area:"Store Operations - Cycle Counts",desc:"Ability to record physical counts using mobile device with barcode scanning"},
+  {id:"ELC-091",n:91,m:3,area:"Store Operations - Cycle Counts",desc:"Ability to calculate count variance automatically upon count completion"},
+  {id:"ELC-092",n:92,m:3,area:"Store Operations - Cycle Counts",desc:"Role-based access control for cycle count variance approvals and inventory adjustments"},
+  {id:"ELC-093",n:93,m:3,area:"Store Operations - Cycle Counts",desc:"Ability to support annual physical inventory count workflow"},
+  {id:"ELC-094",n:94,m:3,area:"Store Operations - Cycle Counts",desc:"Ability to support bi-monthly cycle count workflow distinct from annual physical"},
+  {id:"ELC-095",n:95,m:3,area:"Store Operations - Cycle Counts",desc:"Ability to maintain complete audit trail for all count transactions"},
+  {id:"ELC-096",n:96,m:3,area:"Store Operations - Adjustments",desc:"Ability to record inventory adjustments with required reason codes"},
+  {id:"ELC-097",n:97,m:3,area:"Store Operations - Adjustments",desc:"Ability to require manager approval for material adjustments"},
+  {id:"ELC-098",n:98,m:3,area:"Store Operations - Adjustments",desc:"Ability to maintain real-time sync of adjustments to Shopify POS"},
+  {id:"ELC-099",n:99,m:3,area:"Permissions & Access Control",desc:"Ability to integrate with ELC identity provider (Okta/Azure AD) for SSO. If SSO not supported then will maintain Roles & Permissions in the app postgres DB."},
+  {id:"ELC-100",n:100,m:3,area:"Permissions & Access Control",desc:"Ability to restrict data access by location for store-level users"},
+  {id:"ELC-101",n:101,m:3,area:"Permissions & Access Control",desc:"Ability to support manager PIN authentication for approval workflows"},
+  {id:"ELC-102",n:102,m:3,area:"PMM Deprecation",desc:"Ability to replace PMM functionality for purchase order receiving"},
+  {id:"ELC-103",n:103,m:3,area:"PMM Deprecation",desc:"Ability to replace PMM functionality for store-to-store transfers"},
+  {id:"ELC-104",n:104,m:3,area:"PMM Deprecation",desc:"Ability to replace PMM functionality for cycle counts"},
+  {id:"ELC-105",n:105,m:3,area:"Service & Event Tracking",desc:"Ability to create service appointment bookings at POS"},
+  {id:"ELC-106",n:106,m:3,area:"Service & Event Tracking",desc:"Ability to track service completion and associate attribution"},
+  {id:"ELC-107",n:107,m:3,area:"Service & Event Tracking",desc:"Ability to register customers for in-store events at POS"},
+  {id:"ELC-108",n:108,m:3,area:"Service & Event Tracking",desc:"Ability to track event attendance and post-event sales attribution"},
+  {id:"ELC-109",n:109,m:3,area:"Draft Cycle Count Execution & Exception Reporting",desc:"Ability for store managers to initiate cycle counts,"},
+  {id:"ELC-110",n:110,m:3,area:"Testing & Validation",desc:"RMS functional + integration testing (inventory workflows)"},
+  {id:"ELC-111",n:111,m:3,area:"UX / Design",desc:"RMS UX design + validation (store inventory workflows)"},
+  {id:"ELC-112",n:112,m:4,area:"Canonical Data Model Definition",desc:"RMS architecture mapping + sequence diagrams"},
+  {id:"ELC-113",n:113,m:4,area:"SKU Transformation & Mapping",desc:"RMS data mapping (Shopify/Pipe17/SAP) for store inventory workflows"},
+  {id:"ELC-114",n:114,m:4,area:"Change Management",desc:"RMS discovery workshops + requirements sign-off (store ops)"},
+  {id:"ELC-115",n:115,m:4,area:"Store Go-Live Support",desc:"RMS cutover plan + go-live validation + hypercare"},
+  {id:"ELC-116",n:116,m:4,area:"UX / Design",desc:"RMS UX process & design delivery (research \u2192 wireframes \u2192 hi-fi \u2192 prototyping)"},
+  {id:"ELC-117",n:117,m:4,area:"UX / Design",desc:"Post-launch RMS UX feedback loop (timeboxed)"},
+  {id:"ELC-118",n:118,m:4,area:"Bundle & Kit Management",desc:"Ability to support atomic reservation for bundle components (future Phase 2/3)"},
+  {id:"ELC-119",n:119,m:4,area:"POS Detection & Channel Logic",desc:"Channel detection + channel-aware cart transform routing (POS vs Online)"},
+  {id:"ELC-120",n:120,m:4,area:"GWP Cart Transforms",desc:"GWP (Gift with Purchase) cart handling (auto-add, inventory validation, selection, tiers, multi-brand)"},
+  {id:"ELC-121",n:121,m:4,area:"GWP Cart Transforms",desc:"Ability to remove GWP items from cart when customer no longer qualifies"},
+  {id:"ELC-122",n:122,m:4,area:"GWP Cart Transforms",desc:"Ability to apply GWP claw-back logic for returns where qualifying item is returned"},
+  {id:"ELC-123",n:123,m:4,area:"Bundle Cart Transforms",desc:"Ability to create bundles using metafields and cart transforms instead of Shopify bundle app"},
+  {id:"ELC-124",n:124,m:4,area:"Bundle Cart Transforms",desc:"Ability to expand bundle products into component line items at checkout"},
+  {id:"ELC-125",n:125,m:4,area:"Bundle Cart Transforms",desc:"Ability to maintain bundle pricing integrity when expanding to components"},
+  {id:"ELC-126",n:126,m:4,area:"Bundle Cart Transforms",desc:"Ability to validate bundle component inventory availability across locations"},
+  {id:"ELC-127",n:127,m:4,area:"Bundle Cart Transforms",desc:"Ability to support bundle returns as complete unit vs component-level returns"},
+  {id:"ELC-128",n:128,m:4,area:"Promotional Cart Transforms",desc:"Ability to apply employee/staff discount with proper eligibility validation"},
+  {id:"ELC-129",n:129,m:4,area:"Promotional Cart Transforms",desc:"Ability to support location-based promotions using store ID parameters"},
+  {id:"ELC-130",n:130,m:4,area:"Promotional Cart Transforms",desc:"Ability to support affiliate-based promotions using UTM parameter tracking"},
+  {id:"ELC-131",n:131,m:4,area:"Promotional Cart Transforms",desc:"Ability to exclude specific products from discount eligibility at variant level"},
+  {id:"ELC-132",n:132,m:4,area:"Promotional Cart Transforms",desc:"Ability to prevent double-discounting on subscription orders"},
+  {id:"ELC-133",n:133,m:4,area:"Sample & Collateral Cart Transforms",desc:"Ability to automatically add sample products to cart based on purchase qualification"},
+  {id:"ELC-134",n:134,m:4,area:"Sample & Collateral Cart Transforms",desc:"Ability to automatically add collateral items to orders based on seasonal campaigns"},
+  {id:"ELC-135",n:135,m:4,area:"Personalization Cart Transforms",desc:"Ability to capture and validate engraving text input for personalized products"},
+  {id:"ELC-136",n:136,m:4,area:"Checkout UI Extensions",desc:"Ability to display informational content blocks at checkout"},
+  {id:"ELC-137",n:137,m:4,area:"Checkout UI Extensions",desc:"Ability to validate product restrictions at checkout based on customer address"},
+  {id:"ELC-138",n:138,m:4,area:"Checkout UI Extensions",desc:"Ability to display post-purchase upsell offers at checkout"},
+  {id:"ELC-139",n:139,m:4,area:"Performance & Error Handling",desc:"Ability to handle TalonOne API timeout gracefully without blocking checkout"},
+  {id:"ELC-140",n:140,m:4,area:"Performance & Error Handling",desc:"Ability to handle checkout function limits on Enterprise Shopify plan"},
+  {id:"ELC-141",n:141,m:4,area:"Performance & Error Handling",desc:"Ability to log and monitor all cart transform executions for debugging"},
+  {id:"ELC-142",n:142,m:4,area:"GWP Cart Transforms",desc:"Ability to support customer selection of GWP items when multiple options available"},
+  {id:"ELC-143",n:143,m:4,area:"GWP Cart Transforms",desc:"Ability to validate GWP inventory availability before adding items to cart"},
+  {id:"ELC-144",n:144,m:4,area:"GWP Cart Transforms",desc:"Ability to handle multi-brand GWP eligibility rules in cart"},
+  {id:"ELC-145",n:145,m:5,area:"GWP Cart Transforms",desc:"Ability to support multiple GWP tiers active simultaneously in cart"},
+  {id:"ELC-146",n:146,m:5,area:"Bundle & Kit Management",desc:"Ability to support custom bundle permutations beyond Shopify limits"},
+  {id:"ELC-147",n:147,m:5,area:"Bundle & Kit Management",desc:"Ability to persist ship-together vs ship-separately fulfillment flags for bundles"},
+  {id:"ELC-148",n:148,m:5,area:"Bundle Cart Transforms",desc:"Ability to support fully-custom bundle builder (palette-style selection)"},
+  {id:"ELC-149",n:149,m:5,area:"Bundle & Kit Management",desc:"Ability to persist Bundle ID from PIM through Shopify for http://Talon.One and downstream reporting"},
+  {id:"ELC-150",n:150,m:5,area:"Bundle & Kit Management",desc:"Ability to include collateral SKUs in bundle fulfillment"},
+  {id:"ELC-151",n:151,m:5,area:"InRiver Core Integration",desc:"InRiver connectivity + change detection + publish gating design review (Loki)"},
+  {id:"ELC-152",n:152,m:5,area:"Product Data Mapping",desc:"Flattened catalog mapping spec (fields + media + taxonomy/collections)"},
+  {id:"ELC-153",n:153,m:5,area:"Metafield Strategy",desc:"Shopify data model strategy (metafields/metaobjects + definitions guardrails)"},
+  {id:"ELC-154",n:154,m:5,area:"Metafield Strategy",desc:"Ability to map InRiver locale-specific content to Shopify translations"},
+  {id:"ELC-156",n:156,m:5,area:"SKU Transformation & Mapping",desc:"Ability to maintain productID (or equivalent) as stable primary key across systems"},
+  {id:"ELC-157",n:157,m:5,area:"Variant Structure & Grouping",desc:"Ability to group InRiver Items as Shopify product variants using ItemGrouping field"},
+  {id:"ELC-158",n:158,m:5,area:"Variant Structure & Grouping",desc:"Ability to handle multi-market variant availability scenarios for products with different shade ranges per market"},
+  {id:"ELC-161",n:161,m:5,area:"Loki Enrichment Layer",desc:"Ability to apply Loki data quality validation rules before product publish"},
+  {id:"ELC-162",n:162,m:5,area:"Loki Enrichment Layer",desc:"Ability to apply Loki field transformations for Shopify-specific formatting"},
+  {id:"ELC-164",n:164,m:5,area:"Sync Cadence & Strategy",desc:"Sync operations runbook (cadence + state tracking + monitoring/alerting)"},
+  {id:"ELC-165",n:165,m:5,area:"Sync Cadence & Strategy",desc:"Ability to perform delta product sync on hourly schedule"},
+  {id:"ELC-166",n:166,m:5,area:"Sync Cadence & Strategy",desc:"Ability to perform real-time product sync for VIP/priority product launches"},
+  {id:"ELC-167",n:167,m:5,area:"Error Handling & Monitoring",desc:"Ability to capture sync errors in error queue with exponential backoff retry logic"},
+  {id:"ELC-168",n:168,m:5,area:"Error Handling & Monitoring",desc:"Ability to track sync state with last sync timestamp per product"},
+  {id:"ELC-169",n:169,m:5,area:"Product Lifecycle Management",desc:"Ability to set Shopify product status based on InRiver ProductIsEnabled field"},
+  {id:"ELC-170",n:170,m:5,area:"Product Lifecycle Management",desc:"Ability to handle product archival when products discontinued in InRiver"},
+  {id:"ELC-171",n:171,m:5,area:"Product Lifecycle Management",desc:"Ability to handle product name and brand changes with URL redirect management"},
+  {id:"ELC-172",n:172,m:5,area:"Multi-Brand Support",desc:"Ability to filter and sync products by brand for brand-specific Shopify storefronts"},
+  {id:"ELC-173",n:173,m:5,area:"Multi-Brand Support",desc:"Ability to support brand-specific metafield schemas and product attributes"},
+  {id:"ELC-174",n:174,m:6,area:"Data Migration & Initial Load",desc:"Ability to perform bulk import of MAC product catalog to Shopify for initial load"},
+  {id:"ELC-175",n:175,m:6,area:"Data Migration & Initial Load",desc:"Ability to validate product data quality and completeness before initial Shopify load"},
+  {id:"ELC-176",n:176,m:6,area:"Data Migration & Initial Load",desc:"Ability to handle product image optimization and CDN upload during initial load"},
+  {id:"ELC-177",n:177,m:6,area:"Testing & Validation",desc:"Ability to execute test product catalog sync in non-production environment"},
+  {id:"ELC-178",n:178,m:6,area:"Testing & Validation",desc:"Ability to validate SKU reconciliation between InRiver 6-digit and SAP 10-digit formats"},
+  {id:"ELC-179",n:179,m:6,area:"Documentation & Knowledge Transfer",desc:"InRiver \u2192 Loki \u2192 Shopify data flow architecture documentation"},
+  {id:"ELC-180",n:180,m:6,area:"Documentation & Knowledge Transfer",desc:"Loki team consultation on Shopify integration best practices"},
+  {id:"ELC-181",n:181,m:6,area:"Performance & Scalability",desc:"Ability to handle high-volume product sync without API rate limit violations"},
+  {id:"ELC-182",n:182,m:6,area:"Performance & Scalability",desc:"Ability to scale integration architecture for 20+ brands across multiple markets"},
+  {id:"ELC-183",n:183,m:6,area:"Monitoring & Alerting",desc:"Ability to monitor product sync health metrics with real-time dashboards"},
+  {id:"ELC-184",n:184,m:6,area:"POS Configuration",desc:"Ability to process sales transactions with credit/debit payment methods at POS"},
+  {id:"ELC-185",n:185,m:6,area:"POS Configuration",desc:"Ability to process sales transactions with digital wallet payment methods (Apple Pay, Google Pay) at POS"},
+  {id:"ELC-186",n:186,m:6,area:"POS Configuration",desc:"Ability to process sales transactions with gift card payment methods at POS"},
+  {id:"ELC-187",n:187,m:6,area:"Customer Capture",desc:"Ability to present terms and conditions on pin pad payment device"},
+  {id:"ELC-188",n:188,m:6,area:"Customer Capture",desc:"Ability to collect consent for customer in POS"},
+  {id:"ELC-190",n:190,m:6,area:"Sales Attribution",desc:"Ability to attribute sale to sales associate at line item level"},
+  {id:"ELC-190",n:190,m:6,area:"Sales Attribution",desc:"Ability to attribute sale to sales associate at line item level for two items of the same SKU to different staff"},
+  {id:"ELC-191",n:191,m:6,area:"Sales Attribution",desc:"Ability to enforce single sales associate attribution per line item"},
+  {id:"ELC-192",n:192,m:6,area:"BOPIS - Store Fulfillment Workflows",desc:"BOPIS store workflow in POS \u2014 pickup queue, preparation statuses, pickup completion, and exceptions"},
+  {id:"ELC-193",n:193,m:6,area:"Omni Fulfillment",desc:"Ability to process partial BOPIS pickup with automatic refund"},
+  {id:"ELC-194",n:194,m:6,area:"Omni Fulfillment",desc:"Ability to support BOPIS upsell as separate transaction"},
+  {id:"ELC-195",n:195,m:6,area:"Preorders",desc:"Ability to process preorder transactions for unreleased products at POS"},
+  {id:"ELC-196",n:196,m:6,area:"Preorders",desc:"Ability to configure deposit amount or full payment requirement for preorders"},
+  {id:"ELC-197",n:197,m:6,area:"Preorders",desc:"Ability to notify customers when preorder products become available"},
+  {id:"ELC-198",n:198,m:6,area:"Preorders",desc:"Ability to process preorder cancellations with refund per cancellation policy"},
+  {id:"ELC-199",n:199,m:6,area:"Returns Management",desc:"Ability to support unified returns processing for online and in-store orders"},
+  {id:"ELC-200",n:200,m:6,area:"Payment Capture Integration",desc:"Ability to trigger payment capture on order fulfillment"},
+  {id:"ELC-201",n:201,m:6,area:"OMNI - Ship From Store",desc:"Ship From Store (SFS): fulfill online orders from store inventory via Pipe17 routing rules"},
+  {id:"ELC-202",n:202,m:6,area:"BOPIS - Online Customer Experience",desc:"Ability to show real-time store-level inventory availability for BOPIS-eligible products"},
+  {id:"ELC-203",n:203,m:6,area:"BOPIS - Store Fulfillment Workflows",desc:"Ability to print pick lists for BOPIS orders at store location"},
+  {id:"ELC-204",n:204,m:6,area:"BOPIS - Store Fulfillment Workflows",desc:"Ability to require proof of purchase at BOPIS pickup"},
+  {id:"ELC-205",n:205,m:6,area:"BOPIS - Notifications & Communication",desc:"BOPIS customer notifications \u2014 ready for pickup and pickup reminders"},
+  {id:"ELC-206",n:206,m:6,area:"BOPIS - Payment & Authorization",desc:"BOPIS payment policy \u2014 authorization at checkout, capture at pickup, abandoned pickup handling"},
+  {id:"ELC-207",n:207,m:6,area:"Ship from Store",desc:"Ability to display ship-from-store orders in POS fulfillment queue"},
+  {id:"ELC-208",n:208,m:6,area:"Ship from Store",desc:"Ability to generate shipping labels and tracking numbers for ship-from-store orders"},
+  {id:"ELC-209",n:209,m:6,area:"Mixed Cart Fulfillment",desc:"Ability to process mixed cart orders with some items for immediate sale and others for shipping"},
+  {id:"ELC-210",n:210,m:6,area:"Mixed Cart Fulfillment",desc:"Ability to apply split payment methods for mixed fulfillment carts"},
+  {id:"ELC-211",n:211,m:6,area:"Omnichannel Order Management",desc:"Ability to maintain unified order numbering across online and in-store channels"},
+  {id:"ELC-212",n:212,m:7,area:"Omnichannel Order Management",desc:"Ability to view unified customer profile across online and retail channels"},
+  {id:"ELC-213",n:213,m:7,area:"Omnichannel Order Management",desc:"Ability to track fulfillment status across multiple locations for split shipment orders"},
+  {id:"ELC-214",n:214,m:7,area:"UAT - Financial & Inventory",desc:"Ability to conduct financial validation testing of omnichannel order-to-cash flows"},
+  {id:"ELC-215",n:215,m:7,area:"UAT - Financial & Inventory",desc:"Ability to conduct inventory accuracy validation testing for omnichannel fulfillment"},
+  {id:"ELC-216",n:216,m:7,area:"Testing & Validation",desc:"Omnichannel & Testing delivery (UAT plan + execution support + evidence pack)"},
+  {id:"ELC-217",n:217,m:7,area:"Returns Management",desc:"Cross-channel returns (online\u2194store) \u2014 strategy + inventory disposition + SAP posting alignment"},
+  {id:"ELC-219",n:219,m:7,area:"Omnichannel Fulfillment Support",desc:"BOPIS (Buy Online, Pick Up In Store) \u2014 end-to-end capability"},
+  {id:"ELC-220",n:220,m:7,area:"Endless Aisle (OOFIS)",desc:"Endless Aisle / OOFIS \u2014 end-to-end capability (POS \u2192 inventory validation \u2192 shipment \u2192 posting)"},
+  {id:"ELC-221",n:221,m:7,area:"Testing & Validation",desc:"Omnichannel cutover + go-live readiness (runbooks + dress rehearsal + rollback)"},
+  {id:"ELC-222",n:222,m:7,area:"Testing & Validation",desc:"Omnichannel stabilization & defect triage window (pre/post go-live)"},
+  {id:"ELC-223",n:223,m:7,area:"Omnichannel Order Management",desc:"Omnichannel functional design pack (scenarios + RACI + exception playbooks)"},
+  {id:"ELC-224",n:224,m:7,area:"POS Configuration",desc:"Ability to process sales transactions with store credit payment methods at POS"},
+  {id:"ELC-225",n:225,m:7,area:"POS Configuration",desc:"Ability to look up gift card balance at POS without completing a transaction"},
+  {id:"ELC-226",n:226,m:7,area:"POS Configuration",desc:"Ability to configure tender types by register number"},
+  {id:"ELC-227",n:227,m:7,area:"Return Processing",desc:"Ability to configure return reason codes at POS"},
+  {id:"ELC-228",n:228,m:7,area:"Return Processing",desc:"Ability to prevent \"Restock at this Location\" toggle on returns to maintain inventory integrity"},
+  {id:"ELC-229",n:229,m:7,area:"Return Processing",desc:"Ability to configure non-validated return tender options"},
+  {id:"ELC-230",n:230,m:7,area:"Transaction Management",desc:"Ability to perform post-void transactions with manager approval"},
+  {id:"ELC-231",n:231,m:7,area:"Store Operations - Transfers",desc:"Ability to print shipping labels via Shopify Carrier API integration"},
+  {id:"ELC-232",n:232,m:7,area:"Cash Management",desc:"Ability to set default cash amounts per till for opening"},
+  {id:"ELC-233",n:233,m:7,area:"Cash Management",desc:"Ability to track total daily cash deposits by store"},
+  {id:"ELC-234",n:234,m:7,area:"Operator Attribution",desc:"Ability to capture operator ID for every POS transaction"},
+  {id:"ELC-235",n:235,m:7,area:"Hardware & Infrastructure",desc:"Ability to support Shopify POS hardware roadmap (Hardware Hub)"},
+  {id:"ELC-236",n:236,m:7,area:"Hardware & Infrastructure",desc:"Ability to support handheld scanners for back-office inventory operations"},
+  {id:"ELC-237",n:237,m:7,area:"Hardware & Infrastructure",desc:"Ability to support standard receipt printers for POS and back-office"},
+  {id:"ELC-238",n:238,m:7,area:"PMM Deprecation",desc:"Critical PMM report migration to GCP/Looker or RMS"},
+  {id:"ELC-239",n:239,m:7,area:"PMM Deprecation",desc:"PMM parallel operation support during MAC pilot"},
+  {id:"ELC-240",n:240,m:7,area:"Change Management",desc:"Ability to support store rollout wave planning"},
+  {id:"ELC-241",n:241,m:7,area:"Donations",desc:"Ability to present donation prompt to customer during checkout"},
+  {id:"ELC-242",n:242,m:7,area:"Donations",desc:"Ability to track donation tender separately from product sales"},
+  {id:"ELC-243",n:243,m:8,area:"Donations",desc:"Ability to disable donations during non-campaign periods"},
+  {id:"ELC-244",n:244,m:8,area:"House Accounts",desc:"Ability to process house account transactions with deferred payment (North America)"},
+  {id:"ELC-245",n:245,m:8,area:"House Accounts",desc:"Ability to validate house account credit limit before completing transaction"},
+  {id:"ELC-246",n:246,m:8,area:"House Accounts",desc:"Ability to require manager approval for house account credit limit overrides"},
+  {id:"ELC-247",n:247,m:8,area:"House Accounts",desc:"Ability to process house account payments at POS"},
+  {id:"ELC-248",n:248,m:8,area:"User Management",desc:"Ability to support store associate PIN reset workflow"},
+  {id:"ELC-251",n:251,m:8,area:"Returns Management",desc:"Ability to process buy-online-return-in-store transactions at POS"},
+  {id:"ELC-252",n:252,m:8,area:"Ship From Store (Retail Ops)",desc:"Ability to fulfill online orders by shipping from store inventory"},
+  {id:"ELC-253",n:253,m:8,area:"Ship From Store (Retail Ops)",desc:"Ability to prioritize ship-from-store fulfillment tasks by promised delivery date"},
+  {id:"ELC-254",n:254,m:8,area:"UAT - Retail/POS",desc:"Ability to conduct store user acceptance testing of POS omnichannel workflows"},
+  {id:"ELC-255",n:255,m:8,area:"UAT - Retail/POS",desc:"Ability to conduct store user acceptance testing of in-store returns for online orders"},
+  {id:"ELC-256",n:256,m:8,area:"UAT - Retail/POS",desc:"Ability to conduct store user acceptance testing of customer capture with omnichannel order lookup"},
+  {id:"ELC-257",n:257,m:8,area:"Reconciliation & Controls",desc:"Automate reconciliation entries for shipped-item cash exceptions (Pipe17 \u2192 SAP)"},
+  {id:"ELC-258",n:258,m:8,area:"Period Boxing & Cutoff",desc:"Period boxing & cutoff (calendar, event timing rules, posting date)"},
+  {id:"ELC-259",n:259,m:8,area:"SAP Financial Integration",desc:"Ability to generate Order-to-Fulfillment (OTF) interface files for SAP"},
+  {id:"ELC-260",n:260,m:8,area:"SAP Financial Integration",desc:"Ability to generate Point-of-Sale (POS) interface files for SAP"},
+  {id:"ELC-261",n:261,m:8,area:"SAP Financial Integration",desc:"Ability to generate Returns interface files for SAP"},
+  {id:"ELC-262",n:262,m:8,area:"SAP Financial Integration",desc:"Ability to generate Inventory Adjustment interface files for SAP"},
+  {id:"ELC-263",n:263,m:8,area:"SAP Financial Integration",desc:"Ability to generate Transfer Order interface files for SAP"},
+  {id:"ELC-264",n:264,m:8,area:"SAP Financial Integration",desc:"Ability to maintain bidirectional data flow with SAP via WebMethods"},
+  {id:"ELC-265",n:265,m:8,area:"Reconciliation & Controls",desc:"Ability to provide data for reconciliation between Shopify, Pipe17, and SAP"},
+  {id:"ELC-266",n:266,m:8,area:"Reconciliation & Controls",desc:"Ability to support inventory roll-forward reporting for period reconciliation"},
+  {id:"ELC-267",n:267,m:8,area:"Payment Settlement & DPG",desc:"Maintain 95%+ financial automation standard (posting, clearing, and settlement controls)"},
+  {id:"ELC-268",n:268,m:8,area:"Payment Settlement & DPG",desc:"Shopify payout extraction + DPG payment advice generation (WebMethods)"},
+  {id:"ELC-269",n:269,m:8,area:"Payment Settlement & DPG",desc:"Shopify Payments-only settlement normalization (covered by WebMethods payout extraction + DPG advice)"},
+  {id:"ELC-270",n:270,m:8,area:"Payment Settlement & DPG",desc:"Ability to perform three-way reconciliation (Shopify Payouts, DPG, Bank)"},
+  {id:"ELC-271",n:271,m:8,area:"Payment Settlement & DPG",desc:"Ability to handle payment capture triggered by fulfillment"},
+  {id:"ELC-272",n:272,m:8,area:"Payment Settlement & DPG",desc:"Ability to post DPG journal entries for payment capture"},
+  {id:"ELC-273",n:273,m:8,area:"Payment Settlement & DPG",desc:"Ability to support authorization extension and reauthorization"},
+  {id:"ELC-274",n:274,m:8,area:"Order-to-Cash (POS)",desc:"Ability to distinguish ELC-fulfilled vs Pipe17-fulfilled for GL posting"},
+  {id:"ELC-275",n:275,m:8,area:"Returns & Refunds",desc:"Legacy Retail & Radial returns + refunds transition process"},
+  {id:"ELC-276",n:276,m:8,area:"Returns & Refunds",desc:"Ability to handle refund settlements through payment provider"},
+  {id:"ELC-277",n:277,m:8,area:"COGS & Valuation",desc:"Ability to calculate COGS at fulfillment using SAP standard cost"},
+  {id:"ELC-278",n:278,m:8,area:"COGS & Valuation",desc:"Ability to sync standard cost from SAP Material Master"},
+  {id:"ELC-279",n:279,m:8,area:"Period Boxing & Cutoff",desc:"Ability to handle late-arriving events by auto-tagging to next period"},
+  {id:"ELC-280",n:280,m:8,area:"GL Mapping & Posting",desc:"Ability to maintain GL account mappings by brand/channel/region"},
+  {id:"ELC-281",n:281,m:8,area:"GL Mapping & Posting",desc:"Ability to route orders to correct SAP entity based on brand"},
+  {id:"ELC-282",n:282,m:8,area:"GL Mapping & Posting",desc:"Ability to support multi-entity posting for omnichannel orders"},
+  {id:"ELC-283",n:283,m:8,area:"SKU Mapping",desc:"Ability to support 6-digit to 10-digit SKU transformation"},
+  {id:"ELC-284",n:284,m:8,area:"Reconciliation & Controls",desc:"Ability to support transaction-level reconciliation (Shopify \u2192 SAP)"},
+  {id:"ELC-285",n:285,m:8,area:"Reconciliation & Controls",desc:"Ability to support simplified control model (source-to-target)"},
+  {id:"ELC-286",n:286,m:8,area:"Reconciliation & Controls",desc:"Ability to maintain immutable audit trail for all financial postings"},
+  {id:"ELC-287",n:287,m:8,area:"Exception Handling",desc:"Ability to handle failed SAP postings with retry logic"},
+  {id:"ELC-288",n:288,m:8,area:"Exception Handling",desc:"Ability to provide observability and monitoring for integration health"},
+  {id:"ELC-289",n:289,m:8,area:"Multi-MID & Entity Strategy",desc:"Ability to support multiple merchant IDs (MIDs) per brand/channel"},
+  {id:"ELC-290",n:290,m:8,area:"Multi-MID & Entity Strategy",desc:"Ability to align payment authorization, capture, and sales to same entity"},
+  {id:"ELC-291",n:291,m:9,area:"Gift Card & Multi-Tender",desc:"Ability to handle gift card liability in separate legal entity"},
+  {id:"ELC-292",n:292,m:9,area:"Gift Card & Multi-Tender",desc:"Ability to support multi-tender order processing and reconciliation"},
+  {id:"ELC-293",n:293,m:9,area:"Intercompany Automation",desc:"Ability to automate intercompany reconciliation for omnichannel orders"},
+  {id:"ELC-294",n:294,m:9,area:"Campaign & Promotion Tracking",desc:"Ability to track campaign IDs for GL posting"},
+  {id:"ELC-295",n:295,m:9,area:"Revenue Credit Policy",desc:"Ability to support revenue credit policy (originating vs fulfillment)"},
+  {id:"ELC-296",n:296,m:9,area:"Financial Close & Reporting",desc:"Ability to support daily reconciliation validation"},
+  {id:"ELC-297",n:297,m:9,area:"Financial Close & Reporting",desc:"Ability to support month-end close validation"},
+  {id:"ELC-298",n:298,m:9,area:"Revenue Recognition",desc:"Ability to support P&L accuracy over balance-sheet timing"},
+  {id:"ELC-299",n:299,m:9,area:"SAP Interface Specifications",desc:"SAP interface file specifications + cadence (NASCA schemas, 5-min batches)"},
+  {id:"ELC-300",n:300,m:9,area:"WebMethods Middleware",desc:"Pipe17 XML to SAP RFC/IDOC format transformation"},
+  {id:"ELC-301",n:301,m:9,area:"Consolidation to Shopify Payments",desc:"Ability to support Shopify Payments as standardized PSP"},
+  {id:"ELC-302",n:302,m:9,area:"Intercompany Automation",desc:"Intercompany automation level decision (manual vs automated)"},
+  {id:"ELC-303",n:303,m:9,area:"Reconciliation & Controls",desc:"Reconciliation automation approach for file-based parity + audit evidence"},
+  {id:"ELC-304",n:304,m:9,area:"Revenue Credit Policy",desc:"Revenue credit attribution decision (CFO approval) + implementation trigger"},
+  {id:"ELC-305",n:305,m:9,area:"Vertex Cloud consolidation (MAC retail + online)",desc:"Consolidate MAC retail + online tax calculation into a single Vertex Cloud instance, integrated to Shopify."},
+  {id:"ELC-306",n:306,m:9,area:"Tax rule set (US nexus, effective dates, holidays)",desc:"Consolidate and import tax rules into Vertex Cloud using a Vertex import approach."},
+  {id:"ELC-307",n:307,m:9,area:"Ongoing updates (rates / rules)",desc:"Define how ongoing tax changes are managed in Vertex Cloud for Shopify-connected environments."},
+  {id:"ELC-308",n:308,m:9,area:"Multi-Entity Tax Configuration",desc:"US multi-entity tax + financial routing (online vs retail)"},
+  {id:"ELC-309",n:309,m:9,area:"UK VAT Configuration",desc:"Ability to configure VAT rate at 20% for UK market"},
+  {id:"ELC-310",n:310,m:9,area:"UK VAT Configuration",desc:"UK VAT-inclusive pricing + VAT breakout (receipts/invoices)"},
+  {id:"ELC-311",n:311,m:10,area:"UK VAT Configuration",desc:"Ability to store UK VAT registration number for compliance"},
+  {id:"ELC-312",n:312,m:10,area:"Tax Category Mapping",desc:"Ensure Shopify transactions carry the correct product taxability codes for Vertex/SAP tax processing, with accuracy controls."},
+  {id:"ELC-313",n:313,m:10,area:"Tax Exemption - Certificate Collection",desc:"Tax exemption workflows (certificate capture, validation, and application)"},
+  {id:"ELC-314",n:314,m:10,area:"Tax Exemption - Reporting",desc:"Ability to generate tax exemption reports for compliance audits"},
+  {id:"ELC-315",n:315,m:10,area:"POS Tax Calculation",desc:"POS tax calculation (real-time, offline fallback, and performance)"},
+  {id:"ELC-316",n:316,m:10,area:"Tax Display - Online Checkout",desc:"Ability to display tax as separate line item during online checkout for US customers"},
+  {id:"ELC-317",n:317,m:10,area:"Tax Display - POS",desc:"Ability to display tax on POS customer-facing screen before payment"},
+  {id:"ELC-318",n:318,m:10,area:"Tax Display - POS",desc:"Tax display (online + POS) and customer-facing tax artifacts"},
+  {id:"ELC-319",n:319,m:10,area:"SAP Tax Integration",desc:"Ability to extract tax transaction data from Shopify for SAP remittance"},
+  {id:"ELC-320",n:320,m:10,area:"Vertex Integration",desc:"Ability to post tax amounts to SAP with correct GL account mapping"},
+  {id:"ELC-321",n:321,m:10,area:"Tax Reporting - Compliance",desc:"Ability to generate tax audit trail report for SOX compliance"},
+  {id:"ELC-322",n:322,m:10,area:"Address Validation",desc:"Address validation for tax jurisdiction determination (standard + ambiguous handling)"},
+  {id:"ELC-323",n:323,m:10,area:"Testing & Validation",desc:"Tax testing & validation (US + UK, exemption, multi-entity)"},
+  {id:"ELC-324",n:324,m:10,area:"Configuration Documentation",desc:"Tax runbook & documentation (configuration, change management, audit support)"},
+  {id:"ELC-325",n:325,m:10,area:"Discount Management",desc:"Ability to apply static reason codes for manually applied line item discounts"},
+  {id:"ELC-326",n:326,m:10,area:"Discount Management",desc:"Ability to apply static reason codes for manually applied transaction-level discounts"},
+  {id:"ELC-327",n:327,m:10,area:"Discount Management",desc:"Ability to require manager approval for discounts above configurable threshold"},
+  {id:"ELC-328",n:328,m:10,area:"Discount Functions",desc:"Ability to limit number of items in a single sale transaction"},
+  {id:"ELC-329",n:329,m:10,area:"Loyalty Integration",desc:"Ability to integrate loyalty tier display with customer capture at POS"},
+  {id:"ELC-330",n:330,m:10,area:"Loyalty Integration",desc:"Ability to accrue loyalty points for in-store purchases"},
+  {id:"ELC-331",n:331,m:10,area:"Loyalty Integration",desc:"Ability to redeem loyalty points as payment method at POS"},
+  {id:"ELC-332",n:332,m:10,area:"TalonOne API Integration",desc:"Ability to authenticate API requests to TalonOne with proper security credentials"},
+  {id:"ELC-333",n:333,m:10,area:"Discount Functions",desc:"Ability to apply promotional discounts via custom discount functions using network calls"},
+  {id:"ELC-334",n:334,m:10,area:"Discount Functions",desc:"Ability to handle discount effects array returned from TalonOne API"},
+  {id:"ELC-335",n:335,m:10,area:"Discount Functions",desc:"Ability to support promotional stacking and evaluation order"},
+  {id:"ELC-336",n:336,m:10,area:"Discount Functions",desc:"Ability to prevent double-discounting between TalonOne and Shopify native discounts"},
+  {id:"ELC-337",n:337,m:10,area:"Loyalty - Balance Lookup",desc:"Ability to display customer loyalty points balance in online cart"},
+  {id:"ELC-338",n:338,m:10,area:"Loyalty - Balance Lookup",desc:"Ability to display customer loyalty points balance at POS checkout"},
+  {id:"ELC-339",n:339,m:10,area:"Loyalty - Balance Lookup",desc:"Ability to sync loyalty balance to Shopify customer metafields"},
+  {id:"ELC-340",n:340,m:10,area:"Loyalty - Points Redemption",desc:"Ability to apply loyalty points as discount during online checkout"},
+  {id:"ELC-341",n:341,m:10,area:"Loyalty - Points Redemption",desc:"Ability to apply loyalty points as discount during POS checkout"},
+  {id:"ELC-342",n:342,m:10,area:"Loyalty - Points Earning",desc:"Ability to calculate and display points earning on current cart"},
+  {id:"ELC-343",n:343,m:10,area:"Loyalty - Points Earning",desc:"Ability to credit loyalty points to customer account post-purchase"},
+  {id:"ELC-344",n:344,m:10,area:"Loyalty - Customer Profile",desc:"Ability to enroll customers in loyalty program at POS"},
+  {id:"ELC-345",n:345,m:10,area:"Staff Discount - Eligibility",desc:"Ability to validate employee eligibility for staff discount"},
+  {id:"ELC-346",n:346,m:10,area:"Staff Discount - Application",desc:"Ability to apply staff discount automatically at checkout when staff account is used"},
+  {id:"ELC-347",n:347,m:10,area:"Staff Discount - Application",desc:"Ability to apply staff discount at POS when staff member is logged in"},
+  {id:"ELC-348",n:348,m:11,area:"Staff Discount - Reporting",desc:"Ability to track staff discount usage for financial reporting"},
+  {id:"ELC-349",n:349,m:11,area:"Promotional Pricing Display",desc:"Ability to display promotional pricing in POS cart during checkout"},
+  {id:"ELC-350",n:350,m:11,area:"Bundle Discount Application",desc:"Ability to apply TalonOne promotional discounts to bundled products"},
+  {id:"ELC-351",n:351,m:11,area:"Error Handling - API Failures",desc:"Ability to handle TalonOne API unavailability during checkout"},
+  {id:"ELC-352",n:352,m:11,area:"Error Handling - Insufficient Points",desc:"Ability to handle insufficient loyalty points scenario gracefully"},
+  {id:"ELC-353",n:353,m:11,area:"Error Handling - Promo Code Validation",desc:"Ability to validate promo codes in real-time with clear error messaging"},
+  {id:"ELC-354",n:354,m:11,area:"Offline Scenarios - POS",desc:"Ability to handle POS transactions when TalonOne API is unreachable"},
+  {id:"ELC-355",n:355,m:11,area:"Testing & Validation",desc:"Ability to test complex promotional scenarios with 40+ active cart rules"},
+  {id:"ELC-356",n:356,m:11,area:"Customer Data Sync",desc:"Ability to sync customer profiles from Shopify to TalonOne"},
+  {id:"ELC-357",n:357,m:11,area:"Product Data Sync",desc:"Ability to sync product catalog from Shopify to TalonOne for promotional rules"},
+  {id:"ELC-358",n:358,m:11,area:"Monitoring & Observability",desc:"TalonOne integration performance and error monitoring"},
+  {id:"ELC-359",n:359,m:11,area:"TalonOne API Integration",desc:"http://Talon.One promotions + staff discount integration (real-time apply, data sync, resiliency, monitoring)"},
+  {id:"ELC-360",n:360,m:11,area:"Change Management",desc:"TalonOne ownership/RACI + defect triage + contingency governance"},
+  {id:"ELC-361",n:361,m:11,area:"Staff Discount - Eligibility",desc:"Ability to sync active employee status from HR Connect to Shopify CRM for staff discount eligibility verification"},
+  {id:"ELC-362",n:362,m:11,area:"Store Reporting",desc:"Store operational reporting in RMS (dashboards, queues, search/filter, scheduled summaries)"},
+  {id:"ELC-363",n:363,m:11,area:"Data Replication & Reporting",desc:"GCP reporting data replication (Shopify + Pipe17 transactional + inventory/orchestration)"},
+  {id:"ELC-364",n:364,m:11,area:"Multi-Brand Data Segregation",desc:"Ability to segregate reporting data by brand (MAC, Jo Malone, Clinique, etc.) within unified GCP warehouse"},
+  {id:"ELC-365",n:365,m:11,area:"Order & Payment Data Replication",desc:"Ability to extract complete order lifecycle data from Shopify including order creation, payment authorization, fulfillment, refunds, and cancellations"},
+  {id:"ELC-366",n:366,m:11,area:"Order Fulfillment Events",desc:"Ability to extract Pipe17 order fulfillment orchestration events"},
+  {id:"ELC-367",n:367,m:12,area:"SAP Financial Posting Events",desc:"Ability to extract Pipe17 financial posting events sent to SAP including GL account mapping and posting status"},
+  {id:"ELC-368",n:368,m:12,area:"RMS - Store Manager Inventory Dashboard",desc:"Ability for store managers to view real-time store inventory position via Teifi RMS including on-hand, committed, available, and in-transit quantities"},
+  {id:"ELC-369",n:369,m:12,area:"Transfer Order Tracking & Audit Trail",desc:"Ability for store managers to view auditable timeline of transfer orders including creation, approval, shipment, receipt, and status changes"},
+  {id:"ELC-370",n:370,m:12,area:"PO Receipt Audit Trail",desc:"Ability for store managers to view auditable timeline of purchase order receipts including ASN arrival, receipt scanning, discrepancy resolution, and posting to inventory"},
+  {id:"ELC-371",n:371,m:12,area:"Inventory Roll-Forward Report (Store-Level)",desc:"Ability to generate inventory roll-forward report showing opening balance, receipts, sales, transfers, adjustments, and closing balance by store and financial period"},
+  {id:"ELC-372",n:372,m:12,area:"Inventory Roll-Forward Report (DC-Level)",desc:"Ability to generate inventory roll-forward report showing opening balance, receipts, shipments, returns, adjustments, and closing balance by distribution center and financial period"},
+  {id:"ELC-373",n:373,m:12,area:"Settlement to AR to Bank Clearing Report",desc:"Ability to reconcile Shopify Payments settlement to SAP AR posting to bank deposits with three-way match validation"},
+  {id:"ELC-374",n:374,m:12,area:"Critical Report Inventory & Prioritization",desc:"Ability to identify all business-critical retail reports and prioritize by launch-blocking vs post-launch migration"},
+  {id:"ELC-375",n:375,m:12,area:"Canonical Data Model Definition",desc:"Ability to align Shopify, Pipe17, and SAP data models to ELC's canonical schema for consistent reporting across systems"},
+  {id:"ELC-376",n:376,m:12,area:"Transaction-Level Reconciliation Reports",desc:"Ability to reconcile every transaction at line-item level across Shopify, Pipe17, SAP, and GCP with drilldown to source documents"},
+  {id:"ELC-377",n:377,m:12,area:"Day-1 Critical Reports Identification",desc:"Ability to define minimum viable reporting for MAC launch including Day-1 launch-blocking reports vs 30-day vs 60-day migration"},
+  {id:"ELC-378",n:378,m:12,area:"Interim Reporting During Transition",desc:"Ability to provide interim reporting solution during PMM to Pipe17/Looker migration to maintain business continuity"},
+  {id:"ELC-379",n:379,m:12,area:"Batch Analytics & Financial Reporting",desc:"Ability to provide daily batch analytics and financial reporting via Looker consuming GCP data warehouse for historical analysis and period close"},
+  {id:"ELC-380",n:380,m:12,area:"Role-Based Report Access",desc:"Ability to control report access by user role (store associate, store manager, regional manager, finance, executive) with appropriate data filtering"},
+  {id:"ELC-381",n:381,m:12,area:"Documentation & Knowledge Transfer",desc:"Store operations SOP library (POS + RMS + Returns + Omnichannel)"},
+  {id:"ELC-382",n:382,m:12,area:"Training Content Development - Troubleshooting & Support",desc:"Troubleshooting documentation + recorded support walkthroughs"},
+  {id:"ELC-383",n:383,m:12,area:"Train-the-Trainer Program Design",desc:"Training enablement through documentation (SOPs) + recorded sessions (train-the-trainer program)"},
+  {id:"ELC-384",n:384,m:12,area:"Train-the-Trainer Session Delivery",desc:"Trainer enablement sessions supported by SOPs + recorded modules (train-the-trainer delivery)"},
+  {id:"ELC-385",n:385,m:12,area:"Champion Network Management",desc:"Store champion network identification and management for peer support and best practice sharing"},
+  {id:"ELC-386",n:386,m:12,area:"Store Associate Training Delivery",desc:"Store associate enablement through SOPs + recorded training content (delivered by ELC trainers)"},
+  {id:"ELC-387",n:387,m:12,area:"Store Manager Training Delivery",desc:"Store manager enablement through SOPs + recorded training content (RMS back-office)"},
+  {id:"ELC-388",n:388,m:12,area:"District Manager Training",desc:"District manager training on consolidated reporting, performance metrics, and escalation procedures"},
+  {id:"ELC-389",n:389,m:12,area:"Merchandising Team Training",desc:"Merchandising enablement (split: Teifi back-end/data layer + Domaine front-end/Admin)"},
+  {id:"ELC-390",n:390,m:12,area:"Finance Team Training",desc:"Finance team training on new reconciliation processes, reporting, and GL mapping"},
+  {id:"ELC-391",n:391,m:12,area:"IT Support Team Training",desc:"IT support team training on platform architecture, troubleshooting, and vendor escalation"},
+  {id:"ELC-392",n:392,m:12,area:"Marketing Team Training",desc:"Marketing team training on content tools, campaign setup, and analytics"},
+  {id:"ELC-393",n:393,m:12,area:"Training Materials Creation - Video Tutorials",desc:"Recorded training library (video walkthroughs) tied to SOPs"},
+  {id:"ELC-394",n:394,m:12,area:"Training Materials Creation - Administrator Guides",desc:"Administrator documentation (SOPs/runbooks) + recorded walkthroughs"},
+  {id:"ELC-395",n:395,m:12,area:"Store Rollout Wave Planning",desc:"Rollout approach: pilot + parallel evaluation, then full launch (all stores)"},
+  {id:"ELC-396",n:396,m:12,area:"Pilot Store Selection & Validation",desc:"Pilot store selection and readiness validation before full rollout"},
+  {id:"ELC-397",n:397,m:12,area:"Hardware Deployment Planning",desc:"POS hardware deployment planning including iPads, card readers, receipt printers, and barcode scanners"},
+  {id:"ELC-398",n:398,m:-1,area:"Hardware Configuration & Enrollment",desc:"POS hardware configuration with MDM enrollment, Shopify POS app installation, and network connectivity"},
+  {id:"ELC-399",n:399,m:-1,area:"Store Go-Live Support",desc:"On-site or remote support during store go-live week"},
+  {id:"ELC-400",n:400,m:-1,area:"Hypercare Support (30 Days)",desc:"Hypercare support for 30 days post-launch with enhanced SLAs and monitoring"},
+  {id:"ELC-401",n:401,m:-1,area:"Change Management Communication Plan",desc:"Change management communication plan development and execution to prepare organization for transformation"},
+  {id:"ELC-402",n:402,m:-1,area:"PMM Deprecation Change Management",desc:"PMM deprecation change management including workflow migration and training on RMS replacements"},
+  {id:"ELC-403",n:403,m:-1,area:"Training Delivery Scheduling",desc:"Training delivery scheduling across 159 stores in coordination with rollout waves"},
+  {id:"ELC-404",n:404,m:-1,area:"Training Effectiveness Measurement",desc:"Training effectiveness measurement through surveys."},
+  {id:"ELC-405",n:405,m:-1,area:"Refresher Training Post-Launch",desc:"Refresher training delivery 30 days post-launch to address gaps and reinforce learning"},
+  {id:"ELC-406",n:406,m:-1,area:"Knowledge Transfer to ELC Support Team",desc:"Support enablement through runbooks (SOPs) + recorded KT sessions"},
+  {id:"ELC-407",n:407,m:-1,area:"Multi-Brand Training Replication",desc:"Training materials and approach replication for subsequent brands (Jo Malone, Clinique, etc.) leveraging MAC learnings"},
+  {id:"ELC-408",n:408,m:-1,area:"Training Content Localization",desc:"Training content localization for UK market including terminology, currency, and regulatory differences"},
+  {id:"ELC-409",n:409,m:-1,area:"Training LMS Integration",desc:"Training content integration with ELC learning management system (LMS) for tracking and on-demand access"},
+  {id:"ELC-410",n:410,m:-1,area:"Post-Launch Performance Monitoring",desc:"Post-launch store performance monitoring and identification of stores requiring additional support or training"},
+  {id:"ELC-411",n:411,m:-1,area:"Documentation & Knowledge Transfer",desc:"RMS support handoff (IT + retail ops)"},
+],
+};
+
+const PODS = [
+  { id:'PMO', label:'PMO', color:'#6b7eb5', lead:'Iain Pringle', role:'Delivery Lead', modules:[0],
+    members:['Iain Pringle (PM)','Evan Teifi (Commercial)','Leah (Scrum Master)'],
+    desc:'Programme governance, delivery coordination, risk & schedule management across all workstreams.' },
+  { id:'A', label:'Pod A', color:'#f97316', lead:'Jordan H', role:'Tech Lead', modules:[4,7,12],
+    members:['Jordan H (Lead)','2× FE Dev','1× BA'],
+    desc:'Checkout extensions, cart logic, retail POS rollout and end-user training delivery.' },
+  { id:'B', label:'Pod B', color:'#3b82f6', lead:'Sam K', role:'Tech Lead', modules:[3],
+    members:['Sam K (Lead)','2× BE Dev','1× QA'],
+    desc:'Retail Management System — ELC HQ data model, allocation logic, and Shopify sync.' },
+  { id:'C', label:'Pod C', color:'#10b981', lead:'Alex R', role:'Tech Lead', modules:[2,6,10],
+    members:['Alex R (Lead)','1× Integration Dev','1× FE Dev','1× BA'],
+    desc:'IMS (Pipe17), omnichannel order management, and TalonOne staff-discount configuration.' },
+  { id:'D', label:'Pod D', color:'#8b5cf6', lead:'Morgan T', role:'Tech Lead', modules:[8,9,11],
+    members:['Morgan T (Lead)','2× BE Dev','1× Finance Analyst'],
+    desc:'Financial integrations (Xero/Netsuite), Avalara tax setup, reporting & analytics pipelines.' },
+  { id:'E', label:'Pod E', color:'#ec4899', lead:'Casey L', role:'Tech Lead', modules:[1,5],
+    members:['Casey L (Lead)','2× Infra Dev','1× DevOps'],
+    desc:'Platform & infrastructure (Shopify Plus setup, CI/CD) and Loki (ERP) integration strategy.' },
+];
+
+const ELC_ORG = [
+  { id:'board', label:'ELC Board / Executive Sponsors', level:0, color:'#f59e0b', count:null,
+    desc:'Ultimate commercial owners; approve budget gates and major change requests.' },
+  { id:'steering', label:'Steering Committee', level:1, color:'#f59e0b', count:null,
+    desc:'Cross-functional leads: CTO, CFO, Retail Dir. Monthly governance forum.' },
+  { id:'pmo_elc', label:'ELC Programme Manager', level:2, color:'#6b7eb5', count:1,
+    desc:'Primary counterpart to Teifi PM. Owns internal dependencies and stakeholder comms.' },
+  { id:'tech', label:'ELC Technology Team', level:2, color:'#3b82f6', count:6,
+    desc:'Internal devs, data team and IT ops who own ELC-side infrastructure and integrations.' },
+  { id:'ops', label:'Retail Operations', level:2, color:'#10b981', count:12,
+    desc:'Store managers, regional leads — primary users of RMS, POS and order management.' },
+  { id:'finance', label:'Finance & Tax', level:2, color:'#8b5cf6', count:4,
+    desc:'Xero/Netsuite owners, tax compliance team (Avalara config approvers).' },
+];
+
+const VENDORS = [
+  { name:'Shopify Plus', role:'E-commerce Platform', color:'#96bf48',
+    modules:[0,1,4,7,10], contact:'Shopify Partner Team',
+    desc:'Core commerce platform — storefront, checkout, admin APIs, B2B and POS infrastructure.' },
+  { name:'Pipe17', role:'IMS / Order Routing', color:'#e67e22',
+    modules:[2,6], contact:'Pipe17 CSM',
+    desc:'Inventory management system bridging Shopify with warehouse/3PL and Loki ERP.' },
+  { name:'TalonOne', role:'Promotions & Loyalty', color:'#c0392b',
+    modules:[10], contact:'TalonOne Account Mgr',
+    desc:'Rule-based promotions engine powering staff discounts, loyalty tiers, and campaign coupons.' },
+  { name:'Loki (ERP)', role:'Enterprise Resource Planning', color:'#2980b9',
+    modules:[3,5,8,9], contact:'Loki Integration Lead',
+    desc:'ELC\'s core ERP; source-of-truth for finance, stock allocation, and POS master data.' },
+  { name:'Avalara', role:'Tax Automation', color:'#27ae60',
+    modules:[9], contact:'Avalara Implementation',
+    desc:'Automated VAT/GST calculation and filing — integrated at checkout and invoice generation.' },
+];
+
+const PHASES = [
+  { id:'P1', label:'P1 · Discovery & Setup', color:'#6b7eb5', flex:15,
+    desc:'Requirements gathering, environment setup, architecture decisions, team onboarding.' },
+  { id:'P2', label:'P2 · Core Build', color:'#3b82f6', flex:35,
+    desc:'Primary development sprint for all modules — integrations, custom apps, data models.' },
+  { id:'P3', label:'P3 · Integration & Finance', color:'#8b5cf6', flex:30,
+    desc:'Cross-system integration testing, financial configuration, UAT with ELC stakeholders.' },
+  { id:'P4', label:'P4 · Reporting & Rollout', color:'#10b981', flex:20,
+    desc:'Analytics build-out, training delivery, phased retail rollout, hypercare period.' },
+];
+
+const MILESTONES = {
+  0: [
+    { id:'MS-000', label:'Kick-off & SOW sign-off', phase:'P1', status:'done' },
+    { id:'MS-001', label:'Architecture decision records approved', phase:'P1', status:'done' },
+    { id:'MS-002', label:'Dev environments provisioned', phase:'P1', status:'done' },
+  ],
+  1: [
+    { id:'MS-100', label:'Shopify Plus store scaffold live', phase:'P1', status:'done' },
+    { id:'MS-101', label:'CI/CD pipeline operational', phase:'P2', status:'active' },
+    { id:'MS-102', label:'Theme & PWA baseline deployed', phase:'P2', status:'active' },
+    { id:'MS-103', label:'Performance benchmarks met', phase:'P3', status:'pending' },
+  ],
+  2: [
+    { id:'MS-200', label:'Pipe17 credentials & sandbox', phase:'P1', status:'done' },
+    { id:'MS-201', label:'Product sync Shopify ↔ Pipe17', phase:'P2', status:'active' },
+    { id:'MS-202', label:'Order routing rules configured', phase:'P2', status:'active' },
+    { id:'MS-203', label:'Warehouse fulfilment UAT', phase:'P3', status:'pending' },
+  ],
+  3: [
+    { id:'MS-300', label:'RMS data model signed off', phase:'P1', status:'done' },
+    { id:'MS-301', label:'Stock allocation logic built', phase:'P2', status:'active' },
+    { id:'MS-302', label:'Loki ↔ Shopify stock sync', phase:'P2', status:'active' },
+    { id:'MS-303', label:'ELC HQ UAT complete', phase:'P3', status:'pending' },
+    { id:'MS-304', label:'RMS go-live', phase:'P4', status:'pending' },
+  ],
+  4: [
+    { id:'MS-400', label:'Cart extension spec approved', phase:'P1', status:'done' },
+    { id:'MS-401', label:'Custom cart app built', phase:'P2', status:'active' },
+    { id:'MS-402', label:'Checkout extensions QA', phase:'P3', status:'pending' },
+    { id:'MS-403', label:'Checkout UAT sign-off', phase:'P3', status:'pending' },
+  ],
+  5: [
+    { id:'MS-500', label:'Loki API discovery complete', phase:'P1', status:'done' },
+    { id:'MS-501', label:'Integration pattern agreed', phase:'P1', status:'done' },
+    { id:'MS-502', label:'Loki middleware built', phase:'P2', status:'active' },
+    { id:'MS-503', label:'End-to-end flow tested', phase:'P3', status:'pending' },
+  ],
+  6: [
+    { id:'MS-600', label:'OMS requirements locked', phase:'P1', status:'done' },
+    { id:'MS-601', label:'Click & collect flow built', phase:'P2', status:'active' },
+    { id:'MS-602', label:'Returns & exchanges logic', phase:'P2', status:'active' },
+    { id:'MS-603', label:'Omnichannel UAT', phase:'P3', status:'pending' },
+  ],
+  7: [
+    { id:'MS-700', label:'POS hardware spec signed', phase:'P1', status:'done' },
+    { id:'MS-701', label:'Pilot store go-live (2 stores)', phase:'P3', status:'pending' },
+    { id:'MS-702', label:'Full retail rollout complete', phase:'P4', status:'pending' },
+  ],
+  8: [
+    { id:'MS-800', label:'Chart of accounts mapped', phase:'P1', status:'done' },
+    { id:'MS-801', label:'Xero/Netsuite connector built', phase:'P2', status:'active' },
+    { id:'MS-802', label:'Reconciliation UAT', phase:'P3', status:'pending' },
+    { id:'MS-803', label:'Finance sign-off', phase:'P4', status:'pending' },
+  ],
+  9: [
+    { id:'MS-900', label:'Tax rules configured (Avalara)', phase:'P2', status:'active' },
+    { id:'MS-901', label:'Multi-jurisdiction VAT tested', phase:'P3', status:'pending' },
+    { id:'MS-902', label:'Tax compliance sign-off', phase:'P4', status:'pending' },
+  ],
+  10: [
+    { id:'MS-1000', label:'TalonOne workspace setup', phase:'P2', status:'active' },
+    { id:'MS-1001', label:'Staff discount rules built', phase:'P2', status:'active' },
+    { id:'MS-1002', label:'Promotions UAT', phase:'P3', status:'pending' },
+    { id:'MS-1003', label:'Staff discount go-live', phase:'P4', status:'pending' },
+  ],
+  11: [
+    { id:'MS-1100', label:'Data warehouse schema agreed', phase:'P2', status:'active' },
+    { id:'MS-1101', label:'Reporting dashboards built', phase:'P3', status:'pending' },
+    { id:'MS-1102', label:'BI handover to ELC', phase:'P4', status:'pending' },
+  ],
+  12: [
+    { id:'MS-1200', label:'Training materials drafted', phase:'P3', status:'pending' },
+    { id:'MS-1201', label:'Train-the-trainer sessions', phase:'P4', status:'pending' },
+    { id:'MS-1202', label:'Project closure & hypercare', phase:'P4', status:'pending' },
+  ],
+};
+
+const GLOSSARY = [
+  { term:'ELC', def:'Estée Lauder Companies — the client organisation.', cat:'org' },
+  { term:'Teifi Digital', def:'The systems integrator and delivery partner (us).', cat:'org' },
+  { term:'PMO', def:'Programme Management Office — cross-cutting governance pod.', cat:'org' },
+  { term:'SOW', def:'Statement of Work — the contractual scope document underpinning this project.', cat:'delivery' },
+  { term:'MAC', def:'Multi-brand Architecture Configuration — the Shopify Plus architecture serving multiple ELC brands.', cat:'tech' },
+  { term:'ELC Item', def:'A granular line-item work task within a module, numbered sequentially (e.g. ELC-042).', cat:'delivery' },
+  { term:'Module', def:'A workstream grouping of related ELC items (M00–M12).', cat:'delivery' },
+  { term:'Pod', def:'A delivery squad within Teifi Digital assigned to one or more modules.', cat:'org' },
+  { term:'IMS', def:'Inventory Management System — implemented via Pipe17.', cat:'system' },
+  { term:'RMS', def:'Retail Management System — custom Shopify app for HQ stock allocation.', cat:'system' },
+  { term:'OMS', def:'Order Management System — omnichannel order lifecycle logic.', cat:'system' },
+  { term:'POS', def:'Point of Sale — Shopify POS hardware & software in retail stores.', cat:'system' },
+  { term:'Pipe17', def:'Third-party IMS platform routing orders between Shopify and warehouse/ERP.', cat:'system' },
+  { term:'TalonOne', def:'Promotion engine used for staff discounts, loyalty and coupon management.', cat:'system' },
+  { term:'Loki', def:'ELC\'s ERP system — source of truth for finance, stock and master data.', cat:'system' },
+  { term:'Avalara', def:'Cloud tax-compliance platform for automated VAT/GST calculation.', cat:'system' },
+  { term:'Shopify Plus', def:'Enterprise e-commerce platform powering ELC\'s DTC and B2B channels.', cat:'system' },
+  { term:'ADR', def:'Architecture Decision Record — lightweight doc capturing key technical choices.', cat:'tech' },
+  { term:'CI/CD', def:'Continuous Integration / Continuous Deployment pipeline.', cat:'tech' },
+  { term:'UAT', def:'User Acceptance Testing — sign-off testing by ELC stakeholders.', cat:'delivery' },
+  { term:'PWA', def:'Progressive Web App — enhanced storefront performance layer.', cat:'tech' },
+  { term:'API', def:'Application Programming Interface — integration connection point.', cat:'tech' },
+  { term:'B2B', def:'Business-to-Business — Shopify B2B portal for wholesale/trade buyers.', cat:'commerce' },
+  { term:'DTC', def:'Direct-to-Consumer — primary Shopify storefront channel.', cat:'commerce' },
+  { term:'SKU', def:'Stock Keeping Unit — individual product/variant identifier.', cat:'commerce' },
+  { term:'BOM', def:'Bill of Materials — product bundle definition in the ERP.', cat:'commerce' },
+  { term:'P&L', def:'Profit & Loss — financial reporting statement.', cat:'finance' },
+  { term:'Xero', def:'Cloud accounting platform (UK entity finance).', cat:'finance' },
+  { term:'Netsuite', def:'Oracle ERP / accounting system (group-level finance).', cat:'finance' },
+  { term:'VAT', def:'Value Added Tax — EU/UK consumption tax handled via Avalara.', cat:'finance' },
+  { term:'GDPR', def:'General Data Protection Regulation — EU data privacy law.', cat:'compliance' },
+  { term:'PCI-DSS', def:'Payment Card Industry Data Security Standard.', cat:'compliance' },
+  { term:'hypercare', def:'Post-launch intensive support period (typically 4–8 weeks).', cat:'delivery' },
+  { term:'RFP', def:'Request for Proposal — vendor selection process document.', cat:'delivery' },
+  { term:'SLA', def:'Service Level Agreement — contracted response/uptime commitments.', cat:'delivery' },
+];
+
+
+const MODULE_DEPS = {
+  nodes: [
+    {id:'m0',name:'Discovery & Planning',color:'#475569',pod:'PMO',phases:[1,2]},
+    {id:'m1',name:'Platform & Infrastructure',color:'#4f46e5',pod:'E',phases:[1,2]},
+    {id:'m2',name:'IMS (Pipe17)',color:'#0891b2',pod:'C',phases:[2,3]},
+    {id:'m3',name:'RMS',color:'#d97706',pod:'B',phases:[2,3]},
+    {id:'m4',name:'Checkout Extensions & Cart',color:'#ea580c',pod:'A',phases:[2,3]},
+    {id:'m5',name:'Loki Integration Strategy',color:'#84cc16',pod:'E',phases:[2,3]},
+    {id:'m6',name:'Omnichannel & Order Mgmt',color:'#0d9488',pod:'C',phases:[3,4]},
+    {id:'m7',name:'Retail Rollout',color:'#e11d48',pod:'A',phases:[3,4]},
+    {id:'m8',name:'Financial Integration',color:'#7c3aed',pod:'D',phases:[3,4]},
+    {id:'m9',name:'Tax Configuration',color:'#059669',pod:'D',phases:[3,4]},
+    {id:'m10',name:'TalonOne & Staff Discount',color:'#ec4899',pod:'C',phases:[3,4]},
+    {id:'m11',name:'Reporting & Data Integration',color:'#0284c7',pod:'D',phases:[4]},
+    {id:'m12',name:'Training & Rollout',color:'#ca8a04',pod:'A',phases:[4]},
+  ],
+  edges: [
+    {from:'m0',to:'m1',type:'enables',label:'Governs all'},
+    {from:'m0',to:'m2',type:'enables',label:'Data strategy'},
+    {from:'m0',to:'m3',type:'enables',label:'Product data'},
+    {from:'m1',to:'m2',type:'requires',label:'Infra foundation'},
+    {from:'m1',to:'m3',type:'requires',label:'Infra foundation'},
+    {from:'m1',to:'m4',type:'requires',label:'Infra foundation'},
+    {from:'m1',to:'m5',type:'requires',label:'Infra foundation'},
+    {from:'m2',to:'m6',type:'feeds',label:'Inventory state'},
+    {from:'m2',to:'m11',type:'feeds',label:'Inventory events'},
+    {from:'m3',to:'m4',type:'feeds',label:'Product master'},
+    {from:'m3',to:'m6',type:'feeds',label:'Location data'},
+    {from:'m3',to:'m8',type:'feeds',label:'Store data'},
+    {from:'m4',to:'m6',type:'feeds',label:'Cart & checkout'},
+    {from:'m4',to:'m10',type:'feeds',label:'Promo triggers'},
+    {from:'m5',to:'m4',type:'feeds',label:'PIM data'},
+    {from:'m5',to:'m6',type:'feeds',label:'Product catalog'},
+    {from:'m6',to:'m7',type:'enables',label:'Order platform'},
+    {from:'m6',to:'m8',type:'feeds',label:'Order events'},
+    {from:'m7',to:'m8',type:'triggers',label:'Retail transactions'},
+    {from:'m8',to:'m9',type:'requires',label:'Tax on financials'},
+    {from:'m8',to:'m11',type:'feeds',label:'Financial data'},
+    {from:'m9',to:'m11',type:'feeds',label:'Tax data'},
+    {from:'m10',to:'m11',type:'feeds',label:'Promo & loyalty data'},
+    {from:'m11',to:'m12',type:'enables',label:'Reports ready'},
+    {from:'m7',to:'m12',type:'requires',label:'Store ops scope'},
+  ],
+};
+
+const CROSS_CUTTING = [
+  {id:'cc1',name:'Security & Compliance',priority:'P0',color:'#ef4444',
+   modules:[0,1,2,8],
+   desc:'SOX audit controls, PCI-DSS, GDPR data handling, HMAC validation, TLS 1.3, RBAC, and penetration testing requirements applied across all integration surfaces.'},
+  {id:'cc2',name:'DevOps & CI/CD',priority:'P0',color:'#f97316',
+   modules:[1,2,3],
+   desc:'Shared GitHub Actions pipeline, Terraform IaC, environment management (dev/staging/prod), feature flagging, and release gating across all platform modules.'},
+  {id:'cc3',name:'Data Governance',priority:'P1',color:'#eab308',
+   modules:[0,2,3,5,11],
+   desc:'Canonical data model, global unique identifiers, SKU transformation (6 to 10 digit), location master data, and data retention and lineage policies.'},
+  {id:'cc4',name:'Identity & Access (IAM)',priority:'P1',color:'#22c55e',
+   modules:[1,2,7],
+   desc:'Enterprise SSO via SAML 2.0, SCIM provisioning, HR Connect lifecycle sync, multi-domain auth for brand stores, and delegated token architecture.'},
+  {id:'cc5',name:'Testing & Validation',priority:'P1',color:'#06b6d4',
+   modules:[3,4,6,7,10],
+   desc:'E2E test strategy covering UAT (financial, inventory, POS), regression testing, load testing for peak trade, and cross-module scenario validation.'},
+  {id:'cc6',name:'Change Management',priority:'P2',color:'#8b5cf6',
+   modules:[0,7,12],
+   desc:'Cross-vendor RACI governance, PMM deprecation planning, store rollout wave planning, champion network, and hypercare support model.'},
+  {id:'cc7',name:'Reporting Continuity',priority:'P2',color:'#ec4899',
+   modules:[0,8,9,11],
+   desc:'Day-1 critical report inventory, interim reporting during PMM transition, role-based report access, and batch analytics for financial close.'},
+  {id:'cc8',name:'SKU & Product Data',priority:'P2',color:'#14b8a6',
+   modules:[0,3,4,5],
+   desc:'6 to 10 digit SKU transformation, variant structure and grouping, InRiver PIM integration, metafield strategy, and product lifecycle management across all brand stores.'},
+];
+
+const SOW_VARIABLES = [
+  {key:'NUM_BRANDS',cat:'Scope',label:'Brand Store Count',type:'integer',example:'7',impact:'Multiplies Shopify setup, SSO, tax config, and reporting scope.'},
+  {key:'NUM_MARKETS',cat:'Scope',label:'Markets per Store',type:'integer',example:'2',impact:'Drives Shopify Markets config, tax jurisdiction, and checkout localisation.'},
+  {key:'NUM_LOCATIONS',cat:'Scope',label:'Total Locations',type:'integer',example:'280',impact:'Scales RMS setup, POS deployment, and inventory ledger.'},
+  {key:'NUM_LANGUAGES',cat:'Scope',label:'Content Languages',type:'integer',example:'2',impact:'Affects PIM translation scope and Shopify Markets content.'},
+  {key:'OMNI_FULFILLMENT',cat:'Scope',label:'Omni Fulfillment In Scope',type:'boolean',example:'true',impact:'Activates BOPIS, SFS, endless aisle, and mixed-cart modules.'},
+  {key:'ERP_SYSTEM',cat:'Platform',label:'ERP Platform',type:'string',example:'SAP',impact:'Determines SAP interface specs, GL mapping, and WebMethods middleware scope.'},
+  {key:'IMS_PLATFORM',cat:'Platform',label:'IMS/OMS Platform',type:'string',example:'Pipe17',impact:'Drives integration architecture for order routing and inventory.'},
+  {key:'PIM_SYSTEM',cat:'Platform',label:'PIM System',type:'string',example:'InRiver (Loki)',impact:'Defines product data sync model, metafield strategy, and enrichment layer.'},
+  {key:'TAX_PLATFORM',cat:'Platform',label:'Tax Engine',type:'string',example:'Vertex',impact:'Scopes tax rule configuration, API integration, and VAT handling.'},
+  {key:'PROMO_PLATFORM',cat:'Platform',label:'Promotions Engine',type:'string',example:'TalonOne',impact:'Activates loyalty, staff discount, and promo cart transforms scope.'},
+  {key:'PAYMENTS_PLATFORM',cat:'Platform',label:'Payments Platform',type:'string',example:'Shopify Payments + DPG',impact:'Determines multi-MID strategy, settlement reconciliation, and DPG integration.'},
+  {key:'DELIVERY_PODS',cat:'Team',label:'Delivery Pod Count',type:'integer',example:'6',impact:'Defines team structure: PMO plus Pods A through E across 13 modules.'},
+  {key:'TEIFI_FTE',cat:'Team',label:'Teifi FTE Headcount',type:'integer',example:'12',impact:'Sets resource plan, capacity, and rate card calculation basis.'},
+  {key:'ELC_PM',cat:'Team',label:'ELC Project Manager',type:'string',example:'TBC',impact:'Single-threaded owner for ELC-side decisions, UAT sign-off, and governance.'},
+  {key:'ELC_STEERING',cat:'Team',label:'ELC Steering Committee',type:'string',example:'TBC',impact:'Executive escalation path and change control approval authority.'},
+  {key:'NUM_PHASES',cat:'Timeline',label:'Delivery Phase Count',type:'integer',example:'4',impact:'Defines phase gates, invoice milestones, and hypercare schedule.'},
+  {key:'PHASE_DURATION_WKS',cat:'Timeline',label:'Phase Duration (weeks)',type:'integer',example:'12',impact:'Baseline sprint cadence per phase across all pods.'},
+  {key:'HYPERCARE_DURATION_WKS',cat:'Timeline',label:'Hypercare Duration (weeks)',type:'integer',example:'8',impact:'Post-launch intensive support window before BAU handover.'},
+  {key:'PILOT_STORES',cat:'Timeline',label:'Pilot Store Count',type:'integer',example:'3',impact:'Drives wave 1 rollout scope, training delivery, and UAT sequencing.'},
+  {key:'TOTAL_STORE_WAVES',cat:'Timeline',label:'Total Rollout Waves',type:'integer',example:'4',impact:'Scales store rollout effort in M12 Training and Rollout module.'},
+  {key:'TOTAL_ELC_ITEMS',cat:'Commercial',label:'ELC Line Item Count',type:'integer',example:'411',impact:'Baseline deliverable count; changes tracked via formal change control.'},
+  {key:'RATE_CARD_BASIS',cat:'Commercial',label:'Rate Card Basis',type:'string',example:'Fixed-fee by module',impact:'Sets invoice structure, payment schedule, and scope change pricing.'},
+  {key:'CHANGE_CONTROL_THRESHOLD',cat:'Commercial',label:'Change Control Threshold',type:'percent',example:'15%',impact:'Scope variance percentage that triggers a Change Request and re-pricing.'},
+  {key:'INVOICE_CADENCE',cat:'Commercial',label:'Invoice Cadence',type:'string',example:'Monthly by phase',impact:'Cash flow planning and accounts payable scheduling.'},
+  {key:'INTEGRATION_COMPLEXITY',cat:'Risk',label:'Integration Complexity',type:'enum',example:'High',impact:'SAP + Pipe17 + RMS + TalonOne + Vertex — 8+ system touchpoints.'},
+  {key:'DATA_MIGRATION_RISK',cat:'Risk',label:'Data Migration Risk',type:'enum',example:'High',impact:'PMM deprecation + SKU transform + location master data cutover.'},
+  {key:'VENDOR_DEPENDENCY_COUNT',cat:'Risk',label:'Vendor Dependency Count',type:'integer',example:'8',impact:'Shopify, SAP, Pipe17, TalonOne, Vertex, InRiver, DPG, HR Connect.'},
+  {key:'REGULATORY_SCOPE',cat:'Risk',label:'Regulatory Frameworks',type:'string',example:'SOX, PCI-DSS, GDPR',impact:'Compliance requirements across financial, payment, and data domains.'},
+];
+
+
+// ═══════════════════════════════════════════
+// HELPERS
+// ═══════════════════════════════════════════
+function hexToRgb(hex){
+  const r=parseInt(hex.slice(1,3),16),g=parseInt(hex.slice(3,5),16),b=parseInt(hex.slice(5,7),16);
+  return `${r},${g},${b}`;
+}
+function withAlpha(hex,a){return `rgba(${hexToRgb(hex)},${a})`;}
+const {useState,useMemo,useEffect}=React;
+
+// ═══════════════════════════════════════════
+// SIDEBAR
+// ═══════════════════════════════════════════
+function Sidebar({view,setView}){
+  const items=[
+    {id:'overview',icon:'⬡',label:'Overview'},
+    {id:'org',icon:'◈',label:'Organisation'},
+    {id:'modules',icon:'◫',label:'Modules & Work'},
+    {id:'milestones',icon:'◷',label:'Milestones'},
+    {id:'glossary',icon:'◎',label:'Glossary'},
+    {id:'timeline',icon:'▶',label:'Timeline'},
+    {id:'dependencies',icon:'⬡',label:'Dependencies'},
+    {id:'blueprint',icon:'◳',label:'Blueprint'},
+    {id:'variables',icon:'⚙',label:'Variables'},
+    {id:'document',icon:'📋',label:'Document'},
+  ];
+  return(
+    <div className="sidebar">
+      <div className="nav-logo">
+        <div className="nav-title">ELC · Phase 2A</div>
+        <div className="nav-sub">SOW Explorer</div>
+      </div>
+      <div style={{padding:'8px 0'}}>
+        {items.map(it=>(
+          <div key={it.id} className={`nav-item${view===it.id?' active':''}`} onClick={()=>setView(it.id)}>
+            <span style={{fontSize:16}}>{it.icon}</span>
+            <span>{it.label}</span>
+          </div>
+        ))}
+      </div>
+      <div style={{flex:1}}/>
+      <div style={{padding:'12px 16px',borderTop:'1px solid #1e2a3a'}}>
+        <div className="text-xs text-muted">Teifi Digital · Confidential</div>
+        <div className="text-xs text-muted" style={{marginTop:3}}>MAC SOW · 398 ELC items</div>
+      </div>
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════
+// OVERVIEW VIEW
+// ═══════════════════════════════════════════
+function OverviewView({setView}){
+  const totalItems=SOW_DATA.items.length;
+  const modules=SOW_DATA.modules;
+  return(
+    <div>
+      <div className="page-header">
+        <div className="page-title">Project Overview</div>
+        <div className="page-desc">ELC Phase 2A (MAC) · Teifi Digital · Statement of Work</div>
+      </div>
+      <div className="content">
+        {/* Stats */}
+        <div className="grid-4 mb-4">
+          {[
+            {label:'ELC Line Items',val:totalItems,icon:'◫',color:'#4d8aff'},
+            {label:'Modules',val:modules.length,icon:'◈',color:'#10b981'},
+            {label:'Delivery Pods',val:6,icon:'◉',color:'#f97316'},
+            {label:'Phases',val:4,icon:'◷',color:'#8b5cf6'},
+          ].map(s=>(
+            <div key={s.label} className="stat-card">
+              <div style={{fontSize:22,marginBottom:4}}>{s.icon}</div>
+              <div style={{fontSize:28,fontWeight:700,color:s.color}}>{s.val}</div>
+              <div className="text-xs text-muted" style={{marginTop:2}}>{s.label}</div>
+            </div>
+          ))}
+        </div>
+
+        {/* Phase timeline */}
+        <div className="card mb-4">
+          <div className="section-title">⬡ Delivery Phases</div>
+          <div style={{display:'flex',borderRadius:6,overflow:'hidden',height:36,marginBottom:12}}>
+            {PHASES.map(p=>(
+              <div key={p.id} style={{flex:p.flex,background:p.color,display:'flex',alignItems:'center',justifyContent:'center',fontSize:11,fontWeight:700,color:'#fff',borderRight:'2px solid #0f1117'}}>
+                {p.id}
+              </div>
+            ))}
+          </div>
+          <div style={{display:'flex',gap:16,flexWrap:'wrap'}}>
+            {PHASES.map(p=>(
+              <div key={p.id} style={{display:'flex',alignItems:'flex-start',gap:8,flex:'1 1 200px'}}>
+                <div style={{width:10,height:10,borderRadius:2,background:p.color,marginTop:3,flexShrink:0}}/>
+                <div>
+                  <div style={{fontSize:12,fontWeight:700,color:'#c8d6f0'}}>{p.label}</div>
+                  <div className="text-xs text-muted" style={{marginTop:2}}>{p.desc}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Module grid */}
+        <div className="section-title">◫ All Modules</div>
+        <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(240px,1fr))',gap:12}}>
+          {modules.map(m=>(
+            <div key={m.num} className="hover-card card" style={{borderLeft:`4px solid ${m.color}`,cursor:'pointer'}} onClick={()=>setView('modules')}>
+              <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start',marginBottom:6}}>
+                <span style={{fontFamily:'monospace',fontSize:11,fontWeight:700,color:m.color}}>M{String(m.num).padStart(2,'0')}</span>
+                <span className="badge" style={{background:withAlpha(m.color,0.15),color:m.color}}>{m.count} items</span>
+              </div>
+              <div style={{fontSize:13,fontWeight:600,color:'#e2e8f0',marginBottom:4}}>{m.name}</div>
+              <div className="text-xs text-muted">Pod {m.pod}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════
+// ORG VIEW
+// ═══════════════════════════════════════════
+function OrgView(){
+  const [tab,setTab]=useState('teifi');
+  const [expandedPod,setExpandedPod]=useState(null);
+
+  return(
+    <div>
+      <div className="page-header">
+        <div className="page-title">Organisation</div>
+        <div className="page-desc">Team structure, stakeholders, and vendor ecosystem</div>
+      </div>
+      <div className="content">
+        <div className="tab-bar">
+          {[{id:'teifi',label:'Teifi Digital Pods'},{id:'elc',label:'ELC Stakeholders'},{id:'vendors',label:'Vendor Ecosystem'}].map(t=>(
+            <div key={t.id} className={`tab${tab===t.id?' active':''}`} onClick={()=>setTab(t.id)}>{t.label}</div>
+          ))}
+        </div>
+
+        {tab==='teifi' && (
+          <div>
+            <div className="detail-panel mb-4" style={{padding:'14px 18px'}}>
+              <div className="text-xs text-muted" style={{marginBottom:6}}>DELIVERY MODEL</div>
+              <div className="text-sm">6 squads — 1 PMO + 5 feature pods (A–E). Each pod owns one or more modules end-to-end from design to UAT sign-off.</div>
+            </div>
+            <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(280px,1fr))',gap:14}}>
+              {PODS.map(p=>(
+                <div key={p.id} className="pod-card" style={{background:withAlpha(p.color,0.08),borderColor:expandedPod===p.id?p.color:'transparent'}}
+                  onClick={()=>setExpandedPod(expandedPod===p.id?null:p.id)}>
+                  <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:8}}>
+                    <span style={{fontSize:16,fontWeight:800,color:p.color}}>{p.label}</span>
+                    <span style={{fontSize:11,color:p.color,opacity:.7}}>{expandedPod===p.id?'▲':'▼'}</span>
+                  </div>
+                  <div style={{fontSize:13,fontWeight:600,color:'#e2e8f0'}}>{p.lead}</div>
+                  <div className="text-xs text-muted">{p.role}</div>
+                  <div style={{marginTop:8,display:'flex',gap:4,flexWrap:'wrap'}}>
+                    {p.modules.map(mn=>{
+                      const mod=SOW_DATA.modules.find(x=>x.num===mn);
+                      return mod?(
+                        <span key={mn} className="badge" style={{background:withAlpha(mod.color,0.2),color:mod.color}}>M{String(mn).padStart(2,'0')}</span>
+                      ):null;
+                    })}
+                  </div>
+                  {expandedPod===p.id && (
+                    <div style={{marginTop:12,paddingTop:12,borderTop:`1px solid ${withAlpha(p.color,0.25)}`}}>
+                      <div className="text-xs text-muted mb-2">{p.desc}</div>
+                      <div className="text-xs" style={{color:'#a0b4d6',fontWeight:600,marginBottom:4}}>MEMBERS</div>
+                      {p.members.map((m,i)=><div key={i} className="text-xs text-muted" style={{paddingLeft:8,lineHeight:'1.8'}}>· {m}</div>)}
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {tab==='elc' && (
+          <div>
+            <div className="detail-panel mb-4" style={{padding:'14px 18px'}}>
+              <div className="text-xs text-muted" style={{marginBottom:6}}>GOVERNANCE HIERARCHY</div>
+              <div className="text-sm">ELC stakeholder chain from board sponsors down to operational teams. Programme Manager is primary day-to-day contact.</div>
+            </div>
+            {ELC_ORG.map((node,i)=>(
+              <div key={node.id} style={{marginLeft:node.level*28,marginBottom:8}}>
+                <div className="card" style={{borderLeft:`4px solid ${node.color}`,display:'flex',gap:14,alignItems:'flex-start'}}>
+                  <div style={{flexShrink:0}}>
+                    <div style={{width:32,height:32,borderRadius:8,background:withAlpha(node.color,0.2),display:'flex',alignItems:'center',justifyContent:'center',fontSize:13,fontWeight:800,color:node.color}}>
+                      L{node.level}
+                    </div>
+                  </div>
+                  <div style={{flex:1}}>
+                    <div style={{fontWeight:600,color:'#e2e8f0',marginBottom:3}}>{node.label}</div>
+                    <div className="text-xs text-muted">{node.desc}</div>
+                    {node.count && <div className="text-xs" style={{color:node.color,marginTop:4}}>{node.count} person{node.count>1?'s':''}</div>}
+                  </div>
+                </div>
+                {i<ELC_ORG.length-1 && ELC_ORG[i+1].level>node.level && (
+                  <div style={{width:2,height:8,background:'#1e2a3a',marginLeft:14,marginTop:0}}/>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
+
+        {tab==='vendors' && (
+          <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(260px,1fr))',gap:14}}>
+            {VENDORS.map(v=>(
+              <div key={v.name} className="vendor-card" style={{borderLeft:`4px solid ${v.color}`}}>
+                <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start'}}>
+                  <div style={{fontWeight:700,fontSize:14,color:'#e2e8f0'}}>{v.name}</div>
+                  <span className="badge" style={{background:withAlpha(v.color,0.15),color:v.color,whiteSpace:'nowrap'}}>{v.role}</span>
+                </div>
+                <div className="text-xs text-muted" style={{lineHeight:'1.6'}}>{v.desc}</div>
+                <div style={{display:'flex',gap:4,flexWrap:'wrap',marginTop:6}}>
+                  {v.modules.map(mn=>{
+                    const mod=SOW_DATA.modules.find(x=>x.num===mn);
+                    return mod?(
+                      <span key={mn} className="badge" style={{background:withAlpha(mod.color,0.18),color:mod.color}}>M{String(mn).padStart(2,'0')}</span>
+                    ):null;
+                  })}
+                </div>
+                <div className="text-xs text-muted">Contact: {v.contact}</div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════
+// MODULES VIEW
+// ═══════════════════════════════════════════
+function ModulesView(){
+  const [selMod,setSelMod]=useState(null);
+  const [selArea,setSelArea]=useState(null);
+  const [selItem,setSelItem]=useState(null);
+  const [search,setSearch]=useState('');
+  const [openAreas,setOpenAreas]=useState({});
+
+  const mod=useMemo(()=>selMod!=null?SOW_DATA.modules.find(m=>m.num===selMod):null,[selMod]);
+
+  const areaItems=useMemo(()=>{
+    if(!mod) return {};
+    const map={};
+    SOW_DATA.items.filter(it=>it.m===mod.num).forEach(it=>{
+      if(!map[it.area]) map[it.area]=[];
+      map[it.area].push(it);
+    });
+    return map;
+  },[mod]);
+
+  const filteredItems=useMemo(()=>{
+    if(!selArea) return [];
+    const items=areaItems[selArea]||[];
+    if(!search) return items;
+    const q=search.toLowerCase();
+    return items.filter(it=>it.id.toLowerCase().includes(q)||it.desc.toLowerCase().includes(q)||it.area.toLowerCase().includes(q));
+  },[selArea,areaItems,search]);
+
+  const globalSearch=useMemo(()=>{
+    if(!search||search.length<2) return [];
+    const q=search.toLowerCase();
+    return SOW_DATA.items.filter(it=>it.id.toLowerCase().includes(q)||it.desc.toLowerCase().includes(q)).slice(0,40);
+  },[search]);
+
+  const toggleArea=a=>setOpenAreas(prev=>({...prev,[a]:!prev[a]}));
+
+  // ── Item detail modal ──
+  if(selItem){
+    const it=selItem;
+    const itMod=SOW_DATA.modules.find(m=>m.num===it.m);
+    return(
+      <div>
+        <div className="page-header">
+          <div className="back-btn" onClick={()=>setSelItem(null)}>← Back to {selArea||'module'}</div>
+          <div className="page-title">{it.id}</div>
+          <div className="page-desc">{it.area}</div>
+        </div>
+        <div className="content">
+          <div className="card" style={{borderLeft:`4px solid ${itMod?itMod.color:'#4d8aff'}`}}>
+            <div style={{display:'flex',gap:10,marginBottom:12,flexWrap:'wrap'}}>
+              <span className="badge" style={{background:withAlpha(itMod?itMod.color:'#4d8aff',0.2),color:itMod?itMod.color:'#4d8aff',fontFamily:'monospace'}}>{it.id}</span>
+              {itMod&&<span className="badge" style={{background:withAlpha(itMod.color,0.15),color:itMod.color}}>M{String(itMod.num).padStart(2,'0')} · {itMod.name}</span>}
+              <span className="badge" style={{background:'#1e2a3a',color:'#8896b0'}}>Pod {itMod?itMod.pod:'–'}</span>
+            </div>
+            <div style={{fontSize:14,color:'#e2e8f0',lineHeight:'1.7'}}>{it.desc}</div>
+            <div style={{marginTop:12,paddingTop:12,borderTop:'1px solid #1e2a3a'}}>
+              <div className="text-xs text-muted">Work Area: <span style={{color:'#a0b4d6'}}>{it.area}</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // ── Area drill-down ──
+  if(selArea&&mod){
+    return(
+      <div>
+        <div className="page-header">
+          <div className="back-btn" onClick={()=>{setSelArea(null);setSearch('');}}>← Back to {mod.name}</div>
+          <div className="page-title">{selArea}</div>
+          <div className="page-desc">M{String(mod.num).padStart(2,'0')} · {mod.name} · {(areaItems[selArea]||[]).length} items</div>
+        </div>
+        <div className="content">
+          <div className="search-wrap mb-4">
+            <span className="search-icon">⌕</span>
+            <input className="search-input" placeholder="Search items…" value={search} onChange={e=>setSearch(e.target.value)}/>
+          </div>
+          {filteredItems.map(it=>(
+            <div key={it.id} className="elc-row" style={{borderLeftColor:mod.color}} onClick={()=>setSelItem(it)}>
+              <div style={{display:'flex',gap:10,alignItems:'flex-start'}}>
+                <span className="elc-id">{it.id}</span>
+                <span style={{color:'#c8d6f0',lineHeight:'1.5'}}>{it.desc}</span>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  // ── Module drill-down ──
+  if(mod){
+    return(
+      <div>
+        <div className="page-header" style={{borderLeft:`4px solid ${mod.color}`}}>
+          <div className="back-btn" onClick={()=>{setSelMod(null);setSearch('');}}>← All Modules</div>
+          <div className="page-title">M{String(mod.num).padStart(2,'0')} · {mod.name}</div>
+          <div className="page-desc">Pod {mod.pod} · {mod.count} ELC items · {Object.keys(areaItems).length} work areas</div>
+        </div>
+        <div className="content">
+          {Object.entries(areaItems).map(([area,items])=>(
+            <div key={area} style={{marginBottom:8}}>
+              <div className="area-header" onClick={()=>toggleArea(area)}>
+                <span style={{color:mod.color}}>{openAreas[area]?'▼':'▶'}</span>
+                <span style={{flex:1}}>{area}</span>
+                <span className="badge" style={{background:withAlpha(mod.color,0.15),color:mod.color}}>{items.length}</span>
+                <button className="btn btn-ghost" style={{padding:'2px 10px',fontSize:11}} onClick={e=>{e.stopPropagation();setSelArea(area);}}>View all →</button>
+              </div>
+              {openAreas[area]&&(
+                <div style={{paddingLeft:12}}>
+                  {items.slice(0,5).map(it=>(
+                    <div key={it.id} className="elc-row" style={{borderLeftColor:mod.color}} onClick={()=>setSelItem(it)}>
+                      <div style={{display:'flex',gap:10,alignItems:'flex-start'}}>
+                        <span className="elc-id">{it.id}</span>
+                        <span style={{color:'#c8d6f0',lineHeight:'1.5'}}>{it.desc}</span>
+                      </div>
+                    </div>
+                  ))}
+                  {items.length>5&&<div className="text-xs text-muted" style={{padding:'6px 12px',cursor:'pointer'}} onClick={()=>setSelArea(area)}>+{items.length-5} more → click to expand</div>}
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  // ── Module list (top level) ──
+  return(
+    <div>
+      <div className="page-header">
+        <div className="page-title">Modules & Work Items</div>
+        <div className="page-desc">Drill into any module to explore work areas and all 398 ELC line items</div>
+      </div>
+      <div className="content">
+        <div className="search-wrap mb-4">
+          <span className="search-icon">⌕</span>
+          <input className="search-input" placeholder="Search across all 398 ELC items…" value={search} onChange={e=>setSearch(e.target.value)}/>
+        </div>
+        {search.length>=2?(
+          <div>
+            <div className="section-title">Search results ({globalSearch.length})</div>
+            {globalSearch.map(it=>{
+              const itMod=SOW_DATA.modules.find(m=>m.num===it.m);
+              return(
+                <div key={it.id} className="elc-row" style={{borderLeftColor:itMod?itMod.color:'#4d8aff'}} onClick={()=>setSelItem(it)}>
+                  <div style={{display:'flex',gap:10,alignItems:'flex-start'}}>
+                    <span className="elc-id">{it.id}</span>
+                    <div style={{flex:1}}>
+                      <span style={{color:'#c8d6f0',lineHeight:'1.5'}}>{it.desc}</span>
+                      {itMod&&<div className="text-xs text-muted" style={{marginTop:2}}>{itMod.name} · {it.area}</div>}
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        ):(
+          <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(260px,1fr))',gap:12}}>
+            {SOW_DATA.modules.map(m=>(
+              <div key={m.num} className="hover-card card" style={{borderLeft:`4px solid ${m.color}`,cursor:'pointer'}} onClick={()=>setSelMod(m.num)}>
+                <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start',marginBottom:8}}>
+                  <span style={{fontFamily:'monospace',fontSize:12,fontWeight:800,color:m.color}}>M{String(m.num).padStart(2,'0')}</span>
+                  <span className="badge" style={{background:withAlpha(m.color,0.15),color:m.color}}>{m.count}</span>
+                </div>
+                <div style={{fontWeight:600,fontSize:13,color:'#e2e8f0',marginBottom:6}}>{m.name}</div>
+                <div className="text-xs text-muted" style={{marginBottom:8}}>Pod {m.pod} · {m.areas.length} work areas</div>
+                <div style={{display:'flex',flexWrap:'wrap',gap:3}}>
+                  {m.areas.slice(0,3).map(a=>(
+                    <span key={a} style={{fontSize:10,background:'#1e2a3a',color:'#6b7eb5',padding:'1px 6px',borderRadius:3}}>{a.length>22?a.slice(0,22)+'…':a}</span>
+                  ))}
+                  {m.areas.length>3&&<span style={{fontSize:10,color:'#4d5e80'}}>+{m.areas.length-3} more</span>}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════
+// MILESTONES VIEW
+// ═══════════════════════════════════════════
+function MilestonesView(){
+  const [selMod,setSelMod]=useState(null);
+  const allMods=SOW_DATA.modules;
+  const statusColor={done:'#10b981',active:'#4d8aff',pending:'#3d4f6e'};
+  const statusLabel={done:'Done',active:'In Progress',pending:'Pending'};
+  const phaseColor=Object.fromEntries(PHASES.map(p=>[p.id,p.color]));
+
+  const displayMods=selMod!=null?allMods.filter(m=>m.num===selMod):allMods;
+
+  return(
+    <div>
+      <div className="page-header">
+        <div className="page-title">Milestones</div>
+        <div className="page-desc">Phase-aligned delivery milestones per workstream</div>
+      </div>
+      <div className="content">
+        {/* Phase legend */}
+        <div className="card mb-4" style={{padding:'12px 16px'}}>
+          <div style={{display:'flex',gap:16,flexWrap:'wrap',alignItems:'center'}}>
+            <div className="text-xs" style={{color:'#6b7eb5',fontWeight:700,letterSpacing:1,marginRight:4}}>PHASES</div>
+            {PHASES.map(p=><span key={p.id} className="badge" style={{background:withAlpha(p.color,0.18),color:p.color}}>{p.label}</span>)}
+            <div style={{flex:1}}/>
+            <div className="text-xs" style={{color:'#6b7eb5',fontWeight:700,letterSpacing:1,marginRight:4}}>STATUS</div>
+            {Object.entries(statusLabel).map(([k,v])=><span key={k} className="badge" style={{background:withAlpha(statusColor[k],0.18),color:statusColor[k]}}>{v}</span>)}
+          </div>
+        </div>
+
+        {/* Filter chips */}
+        <div style={{display:'flex',gap:8,flexWrap:'wrap',marginBottom:16}}>
+          <span className={`module-chip${selMod===null?' active':''}`}
+            style={{background:selMod===null?'#1a2744':'#141f35',color:selMod===null?'#7eb8ff':'#6b7eb5',border:'1px solid '+(selMod===null?'#4d8aff':'#1e2a3a')}}
+            onClick={()=>setSelMod(null)}>All Modules</span>
+          {allMods.map(m=>(
+            <span key={m.num} className="module-chip"
+              style={{background:selMod===m.num?withAlpha(m.color,0.25):'#141f35',color:m.color,border:`1px solid ${selMod===m.num?m.color:'#1e2a3a'}`}}
+              onClick={()=>setSelMod(selMod===m.num?null:m.num)}>
+              M{String(m.num).padStart(2,'0')}
+            </span>
+          ))}
+        </div>
+
+        {/* Milestone rows */}
+        {displayMods.map(m=>{
+          const ms=MILESTONES[m.num]||[];
+          return(
+            <div key={m.num} className="card mb-3">
+              <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:10}}>
+                <div style={{display:'flex',alignItems:'center',gap:10}}>
+                  <span style={{fontFamily:'monospace',fontWeight:800,color:m.color}}>M{String(m.num).padStart(2,'0')}</span>
+                  <span style={{fontWeight:600,color:'#c8d6f0'}}>{m.name}</span>
+                </div>
+                <span className="badge" style={{background:withAlpha(m.color,0.15),color:m.color}}>Pod {m.pod}</span>
+              </div>
+              {ms.map(ms=>(
+                <div key={ms.id} className="ms-row">
+                  <span className="ms-id" style={{color:statusColor[ms.status]}}>{ms.id}</span>
+                  <span className="badge" style={{background:withAlpha(phaseColor[ms.phase]||'#4d8aff',0.18),color:phaseColor[ms.phase]||'#4d8aff',minWidth:30}}>{ms.phase}</span>
+                  <span style={{color:'#c8d6f0',flex:1}}>{ms.label}</span>
+                  <span className="badge" style={{background:withAlpha(statusColor[ms.status],0.15),color:statusColor[ms.status]}}>{statusLabel[ms.status]}</span>
+                </div>
+              ))}
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════
+// GLOSSARY VIEW
+// ═══════════════════════════════════════════
+function GlossaryView(){
+  const [search,setSearch]=useState('');
+  const [filter,setFilter]=useState('all');
+  const catColors={org:'#f97316',system:'#3b82f6',tech:'#10b981',commerce:'#f59e0b',finance:'#8b5cf6',compliance:'#ec4899',delivery:'#6b7eb5'};
+  const cats=['all','org','system','tech','commerce','finance','compliance','delivery'];
+
+  const filtered=useMemo(()=>{
+    let g=GLOSSARY;
+    if(filter!=='all') g=g.filter(x=>x.cat===filter);
+    if(search) g=g.filter(x=>x.term.toLowerCase().includes(search.toLowerCase())||x.def.toLowerCase().includes(search.toLowerCase()));
+    return g.sort((a,b)=>a.term.localeCompare(b.term));
+  },[search,filter]);
+
+  return(
+    <div>
+      <div className="page-header">
+        <div className="page-title">Glossary & Legend</div>
+        <div className="page-desc">Acronyms, systems, roles and colour codes used across this project</div>
+      </div>
+      <div className="content">
+        {/* Module colour legend */}
+        <div className="card mb-4">
+          <div className="section-title">◫ Module Colour Legend</div>
+          <div style={{display:'flex',gap:8,flexWrap:'wrap'}}>
+            {SOW_DATA.modules.map(m=>(
+              <div key={m.num} style={{display:'flex',alignItems:'center',gap:6,background:withAlpha(m.color,0.12),padding:'4px 10px',borderRadius:6,border:`1px solid ${withAlpha(m.color,0.25)}`}}>
+                <div style={{width:10,height:10,borderRadius:2,background:m.color}}/>
+                <span style={{fontFamily:'monospace',fontSize:11,fontWeight:700,color:m.color}}>M{String(m.num).padStart(2,'0')}</span>
+                <span className="text-xs" style={{color:'#a0b4d6'}}>{m.name}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Pod colour legend */}
+        <div className="card mb-4">
+          <div className="section-title">◉ Pod Colour Legend</div>
+          <div style={{display:'flex',gap:8,flexWrap:'wrap'}}>
+            {PODS.map(p=>(
+              <div key={p.id} style={{display:'flex',alignItems:'center',gap:6,background:withAlpha(p.color,0.12),padding:'4px 10px',borderRadius:6,border:`1px solid ${withAlpha(p.color,0.25)}`}}>
+                <div style={{width:10,height:10,borderRadius:50,background:p.color}}/>
+                <span style={{fontWeight:700,fontSize:12,color:p.color}}>{p.label}</span>
+                <span className="text-xs" style={{color:'#a0b4d6'}}>{p.lead}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Search + filter */}
+        <div style={{display:'flex',gap:10,marginBottom:14,flexWrap:'wrap',alignItems:'center'}}>
+          <div className="search-wrap" style={{flex:'1 1 200px'}}>
+            <span className="search-icon">⌕</span>
+            <input className="search-input" placeholder="Search terms…" value={search} onChange={e=>setSearch(e.target.value)}/>
+          </div>
+          <div style={{display:'flex',gap:6,flexWrap:'wrap'}}>
+            {cats.map(c=>(
+              <span key={c} onClick={()=>setFilter(c)} style={{cursor:'pointer',padding:'4px 10px',borderRadius:6,fontSize:11,fontWeight:600,
+                background:filter===c?(catColors[c]||'#4d8aff'):('#1e2a3a'),
+                color:filter===c?'#fff':(catColors[c]||'#6b7eb5'),
+                border:`1px solid ${filter===c?(catColors[c]||'#4d8aff'):'#1e2a3a'}`
+              }}>{c}</span>
+            ))}
+          </div>
+        </div>
+
+        {/* Terms table */}
+        <div style={{display:'flex',flexDirection:'column',gap:6}}>
+          {filtered.map(g=>(
+            <div key={g.term} style={{display:'flex',gap:14,padding:'10px 14px',background:'#0d1425',borderRadius:6,alignItems:'flex-start',borderLeft:`3px solid ${catColors[g.cat]||'#4d8aff'}`}}>
+              <div style={{minWidth:120,fontWeight:700,fontFamily:'monospace',color:catColors[g.cat]||'#4d8aff',fontSize:13}}>{g.term}</div>
+              <div style={{flex:1,fontSize:13,color:'#c8d6f0',lineHeight:'1.6'}}>{g.def}</div>
+              <span className="badge" style={{background:withAlpha(catColors[g.cat]||'#4d8aff',0.15),color:catColors[g.cat]||'#4d8aff',flexShrink:0}}>{g.cat}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════
+// TIMELINE VIEW
+// ═══════════════════════════════════════════
+function TimelineView(){
+  const phases=[
+    {id:1,label:'Phase 1',weeks:'Wk 1–12',color:'#4f46e5'},
+    {id:2,label:'Phase 2',weeks:'Wk 13–24',color:'#0891b2'},
+    {id:3,label:'Phase 3',weeks:'Wk 25–36',color:'#d97706'},
+    {id:4,label:'Phase 4',weeks:'Wk 37–48',color:'#059669'},
+  ];
+  const [selected,setSelected]=React.useState(null);
+  const mods=SOW_DATA.modules;
+  const phaseModules=(phaseId)=>mods.filter(m=>{
+    const node=MODULE_DEPS.nodes.find(n=>n.id==='m'+m.num);
+    return node&&node.phases.includes(phaseId);
+  });
+  const selMod=selected?mods.find(m=>m.num===selected):null;
+  const selItems=selected!==null?SOW_DATA.items.filter(i=>i.m===selected):[];
+  const areaGroups=selMod?selMod.areas.map(a=>({
+    area:a,
+    items:selItems.filter(i=>i.area===a)
+  })):[];
+  return(
+    <div style={{padding:'24px',overflowY:'auto',height:'100%',boxSizing:'border-box'}}>
+      <h2 style={{color:'#e2e8f0',marginBottom:4,fontSize:20}}>Timeline</h2>
+      <p style={{color:'#64748b',marginBottom:24,fontSize:13}}>13 modules across 4 phases · 48 weeks · click a module to drill in</p>
+      <div style={{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:16,marginBottom:32}}>
+        {phases.map(ph=>{
+          const pMods=phaseModules(ph.id);
+          return(
+            <div key={ph.id} style={{background:'#1e293b',borderRadius:10,overflow:'hidden',border:`1px solid ${withAlpha(ph.color,0.3)}`}}>
+              <div style={{background:withAlpha(ph.color,0.2),padding:'10px 14px',borderBottom:`1px solid ${withAlpha(ph.color,0.3)}`}}>
+                <div style={{color:ph.color,fontWeight:700,fontSize:13}}>{ph.label}</div>
+                <div style={{color:'#94a3b8',fontSize:11}}>{ph.weeks}</div>
+              </div>
+              <div style={{padding:'10px 8px',display:'flex',flexDirection:'column',gap:6}}>
+                {pMods.map(m=>(
+                  <button key={m.num} onClick={()=>setSelected(selected===m.num?null:m.num)}
+                    style={{background:selected===m.num?withAlpha(m.color,0.3):withAlpha(m.color,0.12),
+                      border:`1px solid ${withAlpha(m.color,selected===m.num?0.7:0.3)}`,
+                      borderRadius:6,padding:'6px 10px',cursor:'pointer',textAlign:'left',
+                      color:m.color,fontSize:11,fontWeight:600,transition:'all .15s'}}>
+                    <span style={{opacity:.7,marginRight:4}}>M{m.num}</span>{m.name}
+                    <span style={{float:'right',color:'#64748b',fontWeight:400}}>{m.count}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+      {selMod&&(
+        <div style={{background:'#1e293b',borderRadius:10,border:`1px solid ${withAlpha(selMod.color,0.4)}`,padding:20}}>
+          <div style={{display:'flex',alignItems:'center',gap:12,marginBottom:16}}>
+            <div style={{width:10,height:10,borderRadius:'50%',background:selMod.color}}/>
+            <h3 style={{color:'#e2e8f0',margin:0,fontSize:16}}>M{selMod.num} · {selMod.name}</h3>
+            <span style={{color:'#64748b',fontSize:13}}>{selMod.count} items · Pod {selMod.pod}</span>
+            <button onClick={()=>setSelected(null)} style={{marginLeft:'auto',background:'none',border:'none',color:'#64748b',cursor:'pointer',fontSize:18}}>✕</button>
+          </div>
+          <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(280px,1fr))',gap:12}}>
+            {areaGroups.map(({area,items})=>(
+              <div key={area} style={{background:'#0f1117',borderRadius:8,padding:'12px 14px',border:'1px solid #1e293b'}}>
+                <div style={{color:selMod.color,fontSize:12,fontWeight:700,marginBottom:8,textTransform:'uppercase',letterSpacing:'.05em'}}>{area} <span style={{color:'#475569',fontWeight:400}}>({items.length})</span></div>
+                {items.map(it=>(
+                  <div key={it.id} style={{color:'#94a3b8',fontSize:11,padding:'3px 0',borderBottom:'1px solid #1e293b20'}}>
+                    <span style={{color:'#475569',marginRight:6}}>{it.id}</span>{it.desc}
+                  </div>
+                ))}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════
+// DEPENDENCY VIEW
+// ═══════════════════════════════════════════
+function DependencyView(){
+  const [tab,setTab]=React.useState('map');
+  const [focus,setFocus]=React.useState(null);
+  const nodes=MODULE_DEPS.nodes;
+  const edges=MODULE_DEPS.edges;
+  const tabs=[{id:'map',label:'Module Map'},{id:'matrix',label:'Dependency Matrix'},{id:'cross',label:'Cross-Cutting'}];
+  const upstream=(id)=>edges.filter(e=>e.to===id).map(e=>({...nodes.find(n=>n.id===e.from),label:e.label,type:e.type}));
+  const downstream=(id)=>edges.filter(e=>e.from===id).map(e=>({...nodes.find(n=>n.id===e.to),label:e.label,type:e.type}));
+  const typeColor={enables:'#4f46e5',requires:'#d97706',feeds:'#0891b2',triggers:'#e11d48'};
+  return(
+    <div style={{padding:'24px',overflowY:'auto',height:'100%',boxSizing:'border-box'}}>
+      <h2 style={{color:'#e2e8f0',marginBottom:4,fontSize:20}}>Dependencies</h2>
+      <p style={{color:'#64748b',marginBottom:16,fontSize:13}}>13 modules · 25 dependency edges · 8 cross-cutting concerns</p>
+      <div style={{display:'flex',gap:8,marginBottom:24}}>
+        {tabs.map(t=>(
+          <button key={t.id} onClick={()=>setTab(t.id)}
+            style={{padding:'7px 18px',borderRadius:6,border:'none',cursor:'pointer',fontSize:13,fontWeight:600,
+              background:tab===t.id?'#4f46e5':'#1e293b',color:tab===t.id?'#fff':'#94a3b8',transition:'all .15s'}}>
+            {t.label}
+          </button>
+        ))}
+      </div>
+      {tab==='map'&&(
+        <div>
+          <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(200px,1fr))',gap:10,marginBottom:20}}>
+            {nodes.map(n=>(
+              <button key={n.id} onClick={()=>setFocus(focus===n.id?null:n.id)}
+                style={{background:focus===n.id?withAlpha(n.color,0.25):withAlpha(n.color,0.1),
+                  border:`1px solid ${withAlpha(n.color,focus===n.id?0.8:0.3)}`,
+                  borderRadius:8,padding:'10px 14px',cursor:'pointer',textAlign:'left',transition:'all .15s'}}>
+                <div style={{color:n.color,fontWeight:700,fontSize:13}}>{n.name}</div>
+                <div style={{color:'#64748b',fontSize:11,marginTop:2}}>Pod {n.pod} · Ph {n.phases.join(',')} · {upstream(n.id).length}↑ {downstream(n.id).length}↓</div>
+              </button>
+            ))}
+          </div>
+          {focus&&(()=>{
+            const fn=nodes.find(n=>n.id===focus);
+            const up=upstream(focus);
+            const dn=downstream(focus);
+            return(
+              <div style={{background:'#1e293b',borderRadius:10,padding:20,border:`1px solid ${withAlpha(fn.color,0.4)}`}}>
+                <div style={{display:'flex',alignItems:'center',gap:10,marginBottom:16}}>
+                  <div style={{width:10,height:10,borderRadius:'50%',background:fn.color}}/>
+                  <h3 style={{color:'#e2e8f0',margin:0,fontSize:16}}>{fn.name}</h3>
+                  <button onClick={()=>setFocus(null)} style={{marginLeft:'auto',background:'none',border:'none',color:'#64748b',cursor:'pointer',fontSize:18}}>✕</button>
+                </div>
+                <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:16}}>
+                  <div>
+                    <div style={{color:'#64748b',fontSize:11,fontWeight:700,textTransform:'uppercase',letterSpacing:'.05em',marginBottom:8}}>Upstream ({up.length})</div>
+                    {up.length?up.map((n,i)=>(
+                      <div key={i} style={{background:'#0f1117',borderRadius:6,padding:'8px 12px',marginBottom:6,display:'flex',alignItems:'center',gap:8}}>
+                        <div style={{width:8,height:8,borderRadius:'50%',background:n.color}}/>
+                        <span style={{color:'#e2e8f0',fontSize:12,flex:1}}>{n.name}</span>
+                        <span style={{color:typeColor[n.type]||'#64748b',fontSize:10,background:withAlpha(typeColor[n.type]||'#64748b',0.15),padding:'2px 6px',borderRadius:4}}>{n.type}</span>
+                        <span style={{color:'#475569',fontSize:10}}>{n.label}</span>
+                      </div>
+                    )):<div style={{color:'#475569',fontSize:12}}>No upstream dependencies</div>}
+                  </div>
+                  <div>
+                    <div style={{color:'#64748b',fontSize:11,fontWeight:700,textTransform:'uppercase',letterSpacing:'.05em',marginBottom:8}}>Downstream ({dn.length})</div>
+                    {dn.length?dn.map((n,i)=>(
+                      <div key={i} style={{background:'#0f1117',borderRadius:6,padding:'8px 12px',marginBottom:6,display:'flex',alignItems:'center',gap:8}}>
+                        <div style={{width:8,height:8,borderRadius:'50%',background:n.color}}/>
+                        <span style={{color:'#e2e8f0',fontSize:12,flex:1}}>{n.name}</span>
+                        <span style={{color:typeColor[n.type]||'#64748b',fontSize:10,background:withAlpha(typeColor[n.type]||'#64748b',0.15),padding:'2px 6px',borderRadius:4}}>{n.type}</span>
+                        <span style={{color:'#475569',fontSize:10}}>{n.label}</span>
+                      </div>
+                    )):<div style={{color:'#475569',fontSize:12}}>No downstream dependents</div>}
+                  </div>
+                </div>
+              </div>
+            );
+          })()}
+        </div>
+      )}
+      {tab==='matrix'&&(
+        <div style={{overflowX:'auto'}}>
+          <table style={{borderCollapse:'collapse',fontSize:10,minWidth:700}}>
+            <thead>
+              <tr>
+                <th style={{padding:'6px 8px',color:'#64748b',textAlign:'left',borderBottom:'1px solid #1e293b',whiteSpace:'nowrap'}}>From → To</th>
+                {nodes.map(n=>(
+                  <th key={n.id} style={{padding:'4px 6px',color:n.color,textAlign:'center',borderBottom:'1px solid #1e293b',whiteSpace:'nowrap',maxWidth:70,overflow:'hidden',textOverflow:'ellipsis'}} title={n.name}>
+                    M{nodes.indexOf(n)}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {nodes.map((from,fi)=>(
+                <tr key={from.id}>
+                  <td style={{padding:'4px 8px',color:from.color,borderBottom:'1px solid #1e293b1a',whiteSpace:'nowrap',fontSize:11}}>M{fi} {from.name.split(' ').slice(0,2).join(' ')}</td>
+                  {nodes.map((to,ti)=>{
+                    const edge=edges.find(e=>e.from===from.id&&e.to===to.id);
+                    return(
+                      <td key={to.id} title={edge?`${from.name} → ${to.name}: ${edge.type} (${edge.label})`:''}
+                        style={{padding:'4px 6px',textAlign:'center',borderBottom:'1px solid #1e293b1a',
+                          background:edge?withAlpha(typeColor[edge.type]||'#64748b',0.25):'transparent',
+                          color:edge?typeColor[edge.type]||'#e2e8f0':'#1e293b',fontSize:9,cursor:edge?'help':'default'}}>
+                        {edge?edge.type.slice(0,3):''}
+                      </td>
+                    );
+                  })}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          <div style={{marginTop:12,display:'flex',gap:12,flexWrap:'wrap'}}>
+            {Object.entries(typeColor).map(([type,color])=>(
+              <span key={type} style={{display:'flex',alignItems:'center',gap:6,fontSize:11,color:'#94a3b8'}}>
+                <span style={{width:12,height:12,borderRadius:2,background:withAlpha(color,0.3),border:`1px solid ${color}`,display:'inline-block'}}/>
+                {type}
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
+      {tab==='cross'&&(
+        <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(280px,1fr))',gap:16}}>
+          {CROSS_CUTTING.map(cc=>(
+            <div key={cc.id} style={{background:'#1e293b',borderRadius:10,padding:'16px 18px',border:`1px solid ${withAlpha(cc.color,0.3)}`}}>
+              <div style={{display:'flex',alignItems:'center',gap:10,marginBottom:10}}>
+                <span style={{fontSize:20}}>{cc.icon}</span>
+                <span style={{color:cc.color,fontWeight:700,fontSize:14}}>{cc.name}</span>
+              </div>
+              <p style={{color:'#94a3b8',fontSize:12,margin:'0 0 12px',lineHeight:1.5}}>{cc.desc}</p>
+              <div style={{display:'flex',flexWrap:'wrap',gap:6}}>
+                {cc.modules.map(mid=>{
+                  const n=MODULE_DEPS.nodes.find(n=>n.id===mid);
+                  return n?(
+                    <span key={mid} style={{background:withAlpha(n.color,0.15),color:n.color,fontSize:10,padding:'2px 8px',borderRadius:4,border:`1px solid ${withAlpha(n.color,0.3)}`}}>
+                      {n.name.split(' ').slice(0,2).join(' ')}
+                    </span>
+                  ):null;
+                })}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════
+// BLUEPRINT VIEW
+// ═══════════════════════════════════════════
+function BlueprintView(){
+  const [search,setSearch]=React.useState('');
+  const [expanded,setExpanded]=React.useState({});
+  const phases=[
+    {id:1,label:'Phase 1 — Foundation',color:'#4f46e5',mods:[0,1]},
+    {id:2,label:'Phase 2 — Core Integrations',color:'#0891b2',mods:[2,3,4,5]},
+    {id:3,label:'Phase 3 — Commerce & Finance',color:'#d97706',mods:[6,7,8,9,10]},
+    {id:4,label:'Phase 4 — Reporting & Launch',color:'#059669',mods:[11,12]},
+  ];
+  const toggle=(key)=>setExpanded(p=>({...p,[key]:!p[key]}));
+  const expandAll=()=>{
+    const next={};
+    phases.forEach(ph=>{
+      next[`ph${ph.id}`]=true;
+      ph.mods.forEach(mn=>{
+        next[`m${mn}`]=true;
+        const mod=SOW_DATA.modules.find(m=>m.num===mn);
+        if(mod)mod.areas.forEach(a=>{ next[`a${mn}_${a}`]=true; });
+      });
+    });
+    setExpanded(next);
+  };
+  const collapseAll=()=>setExpanded({});
+  const q=search.toLowerCase();
+  const matchItem=(it)=>!q||(it.desc.toLowerCase().includes(q)||it.id.toLowerCase().includes(q));
+  const matchArea=(mod,area)=>!q||SOW_DATA.items.filter(i=>i.m===mod.num&&i.area===area).some(matchItem);
+  const matchMod=(mod)=>!q||(mod.name.toLowerCase().includes(q)||mod.areas.some(a=>matchArea(mod,a)));
+  return(
+    <div style={{padding:'24px',overflowY:'auto',height:'100%',boxSizing:'border-box'}}>
+      <h2 style={{color:'#e2e8f0',marginBottom:4,fontSize:20}}>Blueprint</h2>
+      <p style={{color:'#64748b',marginBottom:16,fontSize:13}}>Full SOW hierarchy · Phase → Module → Work Area → ELC Item</p>
+      <div style={{display:'flex',gap:8,marginBottom:20,alignItems:'center'}}>
+        <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Search items, areas, modules…"
+          style={{flex:1,background:'#1e293b',border:'1px solid #334155',borderRadius:6,padding:'8px 14px',color:'#e2e8f0',fontSize:13,outline:'none'}}/>
+        <button onClick={expandAll} style={{padding:'8px 14px',background:'#1e293b',border:'1px solid #334155',borderRadius:6,color:'#94a3b8',cursor:'pointer',fontSize:12}}>Expand All</button>
+        <button onClick={collapseAll} style={{padding:'8px 14px',background:'#1e293b',border:'1px solid #334155',borderRadius:6,color:'#94a3b8',cursor:'pointer',fontSize:12}}>Collapse All</button>
+      </div>
+      {phases.map(ph=>{
+        const phMods=ph.mods.map(mn=>SOW_DATA.modules.find(m=>m.num===mn)).filter(Boolean).filter(matchMod);
+        if(!phMods.length)return null;
+        const phOpen=expanded[`ph${ph.id}`]||!!q;
+        return(
+          <div key={ph.id} style={{marginBottom:12,border:`1px solid ${withAlpha(ph.color,0.3)}`,borderRadius:10,overflow:'hidden'}}>
+            <div onClick={()=>toggle(`ph${ph.id}`)} style={{background:withAlpha(ph.color,0.15),padding:'12px 16px',cursor:'pointer',display:'flex',alignItems:'center',gap:10}}>
+              <span style={{color:ph.color,fontSize:12}}>{phOpen?'▾':'▸'}</span>
+              <span style={{color:ph.color,fontWeight:700,fontSize:14}}>{ph.label}</span>
+              <span style={{color:'#475569',fontSize:12,marginLeft:'auto'}}>{ph.mods.length} modules · {ph.mods.reduce((s,mn)=>{const m=SOW_DATA.modules.find(m=>m.num===mn);return s+(m?m.count:0);},0)} items</span>
+            </div>
+            {phOpen&&phMods.map(mod=>{
+              const mOpen=expanded[`m${mod.num}`]||!!q;
+              return(
+                <div key={mod.num} style={{marginLeft:0,borderTop:`1px solid #1e293b`}}>
+                  <div onClick={()=>toggle(`m${mod.num}`)} style={{padding:'10px 16px 10px 28px',cursor:'pointer',display:'flex',alignItems:'center',gap:10,background:'#1e293b60'}}>
+                    <span style={{color:mod.color,fontSize:11}}>{mOpen?'▾':'▸'}</span>
+                    <div style={{width:8,height:8,borderRadius:'50%',background:mod.color}}/>
+                    <span style={{color:'#e2e8f0',fontWeight:600,fontSize:13}}>M{mod.num} · {mod.name}</span>
+                    <span style={{color:'#475569',fontSize:11,marginLeft:'auto'}}>Pod {mod.pod} · {mod.count} items</span>
+                  </div>
+                  {mOpen&&mod.areas.filter(a=>matchArea(mod,a)).map(area=>{
+                    const aKey=`a${mod.num}_${area}`;
+                    const aOpen=expanded[aKey]||!!q;
+                    const aItems=SOW_DATA.items.filter(i=>i.m===mod.num&&i.area===area).filter(matchItem);
+                    return(
+                      <div key={area} style={{borderTop:'1px solid #1e293b40'}}>
+                        <div onClick={()=>toggle(aKey)} style={{padding:'8px 16px 8px 44px',cursor:'pointer',display:'flex',alignItems:'center',gap:8,background:'#0f111780'}}>
+                          <span style={{color:'#64748b',fontSize:10}}>{aOpen?'▾':'▸'}</span>
+                          <span style={{color:mod.color,fontSize:12,fontWeight:600}}>{area}</span>
+                          <span style={{color:'#475569',fontSize:11,marginLeft:'auto'}}>{aItems.length} items</span>
+                        </div>
+                        {aOpen&&aItems.map(it=>(
+                          <div key={it.id} style={{padding:'5px 16px 5px 60px',borderTop:'1px solid #1e293b20',display:'flex',gap:10,alignItems:'flex-start'}}>
+                            <span style={{color:'#334155',fontSize:10,minWidth:50,fontFamily:'monospace',paddingTop:1}}>{it.id}</span>
+                            <span style={{color:'#94a3b8',fontSize:12,lineHeight:1.45}}>{it.desc}</span>
+                          </div>
+                        ))}
+                      </div>
+                    );
+                  })}
+                </div>
+              );
+            })}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════
+// VARIABLES VIEW
+// ═══════════════════════════════════════════
+function VariablesView(){
+  const [cat,setCat]=React.useState('all');
+  const [search,setSearch]=React.useState('');
+  const cats=['all',...[...new Set(SOW_VARIABLES.map(v=>v.category))]];
+  const catColors={Scope:'#4f46e5',Platform:'#0891b2',Team:'#059669',Timeline:'#d97706',Commercial:'#e11d48',Risk:'#7c3aed'};
+  const filtered=SOW_VARIABLES.filter(v=>(cat==='all'||v.category===cat)&&(!search||(v.key.toLowerCase().includes(search.toLowerCase())||v.label.toLowerCase().includes(search.toLowerCase())||v.description.toLowerCase().includes(search.toLowerCase()))));
+  const typeIcon={number:'#',boolean:'✓',select:'≡',text:'T',array:'[ ]',date:'📅'};
+  return(
+    <div style={{padding:'24px',overflowY:'auto',height:'100%',boxSizing:'border-box'}}>
+      <h2 style={{color:'#e2e8f0',marginBottom:4,fontSize:20}}>Scoping Variables</h2>
+      <p style={{color:'#64748b',marginBottom:16,fontSize:13}}>{SOW_VARIABLES.length} variables across {cats.length-1} categories — the inputs that auto-generate your SOW</p>
+      <div style={{display:'flex',gap:8,marginBottom:16,flexWrap:'wrap',alignItems:'center'}}>
+        <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Search variables…"
+          style={{background:'#1e293b',border:'1px solid #334155',borderRadius:6,padding:'7px 14px',color:'#e2e8f0',fontSize:13,outline:'none',minWidth:200}}/>
+        {cats.map(c=>(
+          <button key={c} onClick={()=>setCat(c)}
+            style={{padding:'6px 14px',borderRadius:6,border:'none',cursor:'pointer',fontSize:12,fontWeight:600,
+              background:cat===c?(catColors[c]||'#4f46e5'):'#1e293b',
+              color:cat===c?'#fff':'#94a3b8',transition:'all .15s',textTransform:'capitalize'}}>
+            {c}
+          </button>
+        ))}
+      </div>
+      <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(320px,1fr))',gap:12}}>
+        {filtered.map(v=>{
+          const cc=catColors[v.category]||'#4f46e5';
+          return(
+            <div key={v.key} style={{background:'#1e293b',borderRadius:10,padding:'14px 16px',border:`1px solid ${withAlpha(cc,0.2)}`}}>
+              <div style={{display:'flex',alignItems:'flex-start',gap:8,marginBottom:8}}>
+                <span style={{background:withAlpha(cc,0.2),color:cc,fontSize:11,padding:'2px 7px',borderRadius:4,fontWeight:700,whiteSpace:'nowrap'}}>{v.category}</span>
+                <span style={{background:'#0f1117',color:'#64748b',fontSize:11,padding:'2px 7px',borderRadius:4,fontFamily:'monospace',marginLeft:'auto',whiteSpace:'nowrap'}}>{typeIcon[v.type]||v.type} {v.type}</span>
+              </div>
+              <div style={{color:cc,fontWeight:700,fontSize:13,marginBottom:2,fontFamily:'monospace'}}>{v.key}</div>
+              <div style={{color:'#e2e8f0',fontSize:13,marginBottom:6}}>{v.label}</div>
+              <div style={{color:'#64748b',fontSize:12,marginBottom:10,lineHeight:1.4}}>{v.description}</div>
+              <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:8}}>
+                <div style={{background:'#0f1117',borderRadius:6,padding:'6px 10px'}}>
+                  <div style={{color:'#475569',fontSize:10,marginBottom:2}}>EXAMPLE</div>
+                  <div style={{color:'#94a3b8',fontSize:11,fontFamily:'monospace'}}>{v.example}</div>
+                </div>
+                <div style={{background:'#0f1117',borderRadius:6,padding:'6px 10px'}}>
+                  <div style={{color:'#475569',fontSize:10,marginBottom:2}}>IMPACT</div>
+                  <div style={{color:'#94a3b8',fontSize:11}}>{v.impact}</div>
+                </div>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════
+// DOCUMENT VIEW
+// ═══════════════════════════════════════════
+function DocumentView(){
+  const [expanded,setExpanded]=React.useState({});
+  const toggle=id=>setExpanded(e=>({...e,[id]:!e[id]}));
+  const COLORS={identity:"#3b82f6",date:"#8b5cf6",financial:"#10b981",contact:"#f59e0b",content:"#6b7280",list:"#ec4899",module:"#06b6d4"};
+  const Tag=({label,type="content"})=>(
+    <span style={{display:"inline-flex",alignItems:"center",background:COLORS[type]+"22",border:"1px solid "+COLORS[type]+"55",color:COLORS[type],borderRadius:4,padding:"2px 7px",fontSize:10,fontFamily:"monospace",margin:"2px 3px",fontWeight:600,whiteSpace:"nowrap"}}>{label}</span>
+  );
+  const sections=[
+    {id:"cover",icon:"📄",title:"Cover Page",src:"Table 0",desc:"Document header with date, client contacts, agency branding.",
+     vars:[{l:"sow_date",t:"date"},{l:"client_name",t:"identity"},{l:"client_contact_name",t:"contact"},{l:"client_contact_title",t:"contact"},{l:"client_contact_2_name",t:"contact"},{l:"client_contact_2_title",t:"contact"},{l:"agency_name",t:"identity"},{l:"project_name",t:"identity"},{l:"phase_label",t:"identity"}],
+     blocks:[{b:"Agency Logo / Cover Branding",h:50,v:["agency_name"]},{b:"Document Title + Phase",h:30,v:["project_name","phase_label"]},{b:"Date Prepared",h:20,v:["sow_date"]},{b:"Prepared For (Client Contacts)",h:35,v:["client_name","client_contact_name","client_contact_title","client_contact_2_name","client_contact_2_title"]},{b:"Prepared By (Agency)",h:22,v:["agency_name"]}]},
+    {id:"project",icon:"🏷",title:"Project Details",src:"Table 1",desc:"Client name, project name, phase label, and timeline targets.",
+     vars:[{l:"client_name",t:"identity"},{l:"project_name",t:"identity"},{l:"phase_label",t:"identity"},{l:"target_kickoff",t:"date"},{l:"target_launch",t:"date"}],
+     blocks:[{b:"Client Name",h:22,v:["client_name"]},{b:"Project Name + Phase",h:22,v:["project_name","phase_label"]},{b:"Target Kickoff / Target Launch",h:22,v:["target_kickoff","target_launch"]}]},
+    {id:"phase",icon:"📝",title:"Phase Description",src:"Table 2",desc:"Narrative description of this phase scope, rationale, and foundation context.",
+     vars:[{l:"phase_description",t:"content"},{l:"phase_scope_summary",t:"content"}],
+     blocks:[{b:"Long-form Phase Narrative",h:70,v:["phase_description","phase_scope_summary"]}]},
+    {id:"toc",icon:"📑",title:"Table of Contents",src:"Table 3",desc:"Module list (00-12) forming the SOW structure.",
+     vars:[{l:"modules[]",t:"module"},{l:"module_name x13",t:"module"}],
+     blocks:[{b:"Module 00 - Discovery and Planning",h:18,v:["module_name"]},{b:"Module 01-12 ...",h:55,v:["modules[]"]}]},
+    {id:"budget",icon:"💰",title:"Budget Summary",src:"Tables 4-5",desc:"Per-module fees, subtotal, GST status, and total USD.",
+     vars:[{l:"modules[]",t:"module"},{l:"subtotal_usd",t:"financial"},{l:"gst_status",t:"financial"},{l:"total_usd",t:"financial"}],
+     blocks:[{b:"Module Fee Rows (13 rows)",h:55,v:["modules[]"]},{b:"Subtotal Row",h:20,v:["subtotal_usd"]},{b:"GST / Tax Row",h:20,v:["gst_status"]},{b:"Total Row",h:24,v:["total_usd"]}]},
+    {id:"milestones",icon:"🏁",title:"Module Milestones",src:"Tables 6-18",desc:"Per-module milestone tables (13 modules, 6-17 milestones each).",
+     vars:[{l:"module_name",t:"module"},{l:"milestone_id[]",t:"identity"},{l:"milestone_description[]",t:"content"}],
+     blocks:[{b:"Module Heading",h:22,v:["module_name"]},{b:"Milestone ID | Description rows",h:85,v:["milestone_id[]","milestone_description[]"]},{b:"(x13 modules)",h:16,v:[]}]},
+    {id:"lineitems",icon:"🗂",title:"Line Items",src:"Tables 25-37",desc:"431 line items across 13 modules (ELC-001 to ELC-411). Columns: ID, Area, Requirement/Service, Approach.",
+     vars:[{l:"item_id",t:"identity"},{l:"area",t:"module"},{l:"requirement_service",t:"content"},{l:"approach",t:"content"}],
+     blocks:[{b:"Module Heading",h:22,v:["module_name"]},{b:"ID | Area | Requirement | Approach rows",h:100,v:["item_id","area","requirement_service","approach"]},{b:"(x13 modules, 431 total rows)",h:16,v:[]}]},
+    {id:"payment",icon:"💳",title:"Payment Schedule",src:"Table 19",desc:"5-milestone payment schedule with deposit percentage and milestone triggers.",
+     vars:[{l:"deposit_pct",t:"financial"},{l:"payment_milestone_name[]",t:"identity"},{l:"payment_milestone_desc[]",t:"content"}],
+     blocks:[{b:"Milestone 1 - Deposit",h:22,v:["deposit_pct"]},{b:"Milestones 2-5",h:60,v:["payment_milestone_name[]","payment_milestone_desc[]"]}]},
+    {id:"assumptions",icon:"⚠",title:"Assumptions",src:"Table 20",desc:"37 assumption rows. Columns: Assumption, Category, Notes/Dependencies, Owner.",
+     vars:[{l:"assumption_text",t:"content"},{l:"assumption_category",t:"identity"},{l:"notes_dependencies",t:"content"},{l:"owner",t:"contact"}],
+     blocks:[{b:"Assumption | Category | Notes | Owner",h:100,v:["assumption_text","assumption_category","notes_dependencies","owner"]},{b:"(37 rows)",h:16,v:[]}]},
+    {id:"signatures",icon:"✍",title:"Signatures",src:"Tables 21-22",desc:"Client and agency signatory blocks with signature lines and dates.",
+     vars:[{l:"client_signatory_name",t:"contact"},{l:"client_signatory_date",t:"date"},{l:"agency_signatory_name",t:"contact"},{l:"agency_signatory_date",t:"date"}],
+     blocks:[{b:"Client Signature Block",h:45,v:["client_signatory_name","client_signatory_date"]},{b:"Agency Signature Block",h:45,v:["agency_signatory_name","agency_signatory_date"]}]},
+    {id:"team",icon:"👥",title:"Team and Pods",src:"Tables 23-24",desc:"PMO team roles/allocations and pod structure with scope and PMO touchpoints.",
+     vars:[{l:"team_role[]",t:"identity"},{l:"allocation[]",t:"content"},{l:"pod_name[]",t:"identity"},{l:"pod_scope[]",t:"content"}],
+     blocks:[{b:"PMO Team: Role | Allocation | Scope",h:50,v:["team_role[]","allocation[]"]},{b:"Pod Structure: Pod | Scope | Touchpoints",h:50,v:["pod_name[]","pod_scope[]"]}]},
+  ];
+  return(
+    <div style={{padding:"24px",maxWidth:1100,margin:"0 auto"}}>
+      <div style={{marginBottom:20}}>
+        <h2 style={{color:"#f1f5f9",fontSize:22,fontWeight:700,margin:0}}>SOW Document Anatomy</h2>
+        <p style={{color:"#64748b",fontSize:13,marginTop:6,marginBottom:0}}>Visual map of every section, its source table(s), and the template variables it contains. Click to expand.</p>
+      </div>
+      <div style={{display:"flex",flexWrap:"wrap",gap:8,marginBottom:20,padding:"10px 16px",background:"#0f1117",borderRadius:8,border:"1px solid #1e293b"}}>
+        <span style={{color:"#475569",fontSize:11,alignSelf:"center",marginRight:4}}>TYPE:</span>
+        {Object.entries(COLORS).map(([t,c])=>(
+          <span key={t} style={{display:"flex",alignItems:"center",gap:4}}>
+            <span style={{width:8,height:8,borderRadius:2,background:c,display:"inline-block"}}/>
+            <span style={{color:"#94a3b8",fontSize:11}}>{t}</span>
+          </span>
+        ))}
+      </div>
+      <div style={{display:"flex",flexDirection:"column",gap:6}}>
+        {sections.map(sec=>{
+          const open=expanded[sec.id];
+          return(
+            <div key={sec.id} style={{border:"1px solid #1e293b",borderRadius:8,overflow:"hidden",background:"#0a0d14"}}>
+              <div onClick={()=>toggle(sec.id)} style={{display:"flex",alignItems:"center",gap:12,padding:"10px 16px",cursor:"pointer",background:open?"#111827":"#0a0d14",borderBottom:open?"1px solid #1e293b":"none",userSelect:"none"}}>
+                <span style={{fontSize:16}}>{sec.icon}</span>
+                <div style={{flex:1,minWidth:0}}>
+                  <div style={{display:"flex",alignItems:"center",gap:8}}>
+                    <span style={{color:"#f1f5f9",fontSize:13,fontWeight:600}}>{sec.title}</span>
+                    <span style={{color:"#334155",fontSize:11,fontFamily:"monospace"}}>{sec.src}</span>
+                  </div>
+                  <div style={{marginTop:3,display:"flex",flexWrap:"wrap",gap:0}}>
+                    {sec.vars.map(v=><Tag key={v.l} label={v.l} type={v.t}/>)}
+                  </div>
+                </div>
+                <span style={{color:"#475569",fontSize:14,marginLeft:8}}>{open?"▲":"▼"}</span>
+              </div>
+              {open&&(
+                <div style={{display:"flex",gap:0}}>
+                  <div style={{flex:"0 0 340px",padding:"16px",borderRight:"1px solid #1e293b"}}>
+                    <div style={{color:"#475569",fontSize:10,fontWeight:600,letterSpacing:1,marginBottom:10,textTransform:"uppercase"}}>Wireframe</div>
+                    <div style={{border:"1px solid #1e293b",borderRadius:6,background:"#0f1117",padding:8,display:"flex",flexDirection:"column",gap:6}}>
+                      {sec.blocks.map((wb,wi)=>(
+                        <div key={wi} style={{background:"#161b26",border:"1px solid #1e293b",borderRadius:4,minHeight:wb.h,padding:"6px 8px",display:"flex",flexDirection:"column",justifyContent:"center",gap:4}}>
+                          <div style={{color:"#475569",fontSize:10,fontFamily:"monospace"}}>{wb.b}</div>
+                          {wb.v.length>0&&(
+                            <div style={{display:"flex",flexWrap:"wrap",gap:0,marginTop:2}}>
+                              {wb.v.map(vl=>{
+                                const vv=sec.vars.find(sv=>sv.l===vl);
+                                return <Tag key={vl} label={vl} type={vv?vv.t:"content"}/>;
+                              })}
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                  <div style={{flex:1,padding:"16px"}}>
+                    <div style={{color:"#475569",fontSize:10,fontWeight:600,letterSpacing:1,marginBottom:10,textTransform:"uppercase"}}>Variables in this section</div>
+                    <div style={{color:"#94a3b8",fontSize:12,marginBottom:12,lineHeight:1.6}}>{sec.desc}</div>
+                    <div style={{display:"flex",flexDirection:"column",gap:6}}>
+                      {sec.vars.map(v=>(
+                        <div key={v.l} style={{display:"flex",alignItems:"flex-start",gap:10,padding:"8px 12px",background:"#0f1117",border:"1px solid #1e293b",borderRadius:6}}>
+                          <span style={{width:10,height:10,borderRadius:2,background:COLORS[v.t],marginTop:3,flexShrink:0}}/>
+                          <div>
+                            <div style={{fontFamily:"monospace",color:"#e2e8f0",fontSize:12,fontWeight:600}}>{v.l}</div>
+                            <div style={{color:"#475569",fontSize:10,marginTop:1}}>{v.t}</div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
+      <div style={{marginTop:20,padding:"12px 16px",background:"#0f1117",borderRadius:8,border:"1px solid #1e293b",display:"flex",gap:32,flexWrap:"wrap"}}>
+        {[["Sections",sections.length],["Source Tables","38"],["Total Line Items","431"],["Variables","~30"]].map(([k,v])=>(
+          <div key={k}><div style={{color:"#475569",fontSize:10,textTransform:"uppercase",letterSpacing:1}}>{k}</div><div style={{color:"#f1f5f9",fontSize:20,fontWeight:700}}>{v}</div></div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════
+// APP ROOT
+// ═══════════════════════════════════════════
+function App(){
+  const [view,setView]=useState('overview');
+  const views={
+    overview:<OverviewView setView={setView}/>,
+    org:<OrgView/>,
+    modules:<ModulesView/>,
+    milestones:<MilestonesView/>,
+    glossary:<GlossaryView/>,
+    timeline:<TimelineView/>,
+    dependencies:<DependencyView/>,
+    blueprint:<BlueprintView/>,
+    variables:<VariablesView/>,
+    document:<DocumentView/>,
+  };
+  return(
+    <div style={{display:'flex',minHeight:'100vh'}}>
+      <Sidebar view={view} setView={setView}/>
+      <div className="main">{views[view]||views.overview}</div>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
+
+</script>
+</body>
+</html>
